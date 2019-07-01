@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Markable ветка не твоя
+ * @author Markable ветка не твоя. Моя!
  */
 public class ServerMain {
     
