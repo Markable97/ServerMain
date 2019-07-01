@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Markable
+ * @author Markable ветка братишки
  */
 public class ServerMain {
     
