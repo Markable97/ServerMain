@@ -236,9 +236,9 @@ public class DataBaseRequest {
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            connect.close();
             rsTournamnetTable.close();
             rsPrevMatches.close();
+            rsNextMathces.close();
         }
     }
     
