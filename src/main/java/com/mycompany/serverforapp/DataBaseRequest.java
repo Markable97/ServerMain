@@ -13,14 +13,29 @@ import java.util.logging.Logger;
  */
 public class DataBaseRequest {
     
-    private static String user = "root";
-    private static String password = "7913194";
-    private static String url = "jdbc:mysql://localhost:3306/football_main";
-    private static String message = "Все нормасно";
-    private static Connection connect;
+    public static DataBaseRequest db;
+    Connection connect;
+    private DataBaseRequest(){
+       String user = "root";
+       String password = "7913194";
+       String url = "jdbc:mysql://localhost:3306/football_main";
+        try {
+            this.connect = DriverManager.getConnection(url, user, password);
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    } 
+     
+   public static synchronized DataBaseRequest getInstance(){
+       if (db == null){
+           db = new DataBaseRequest();
+       }
+       return db;
+   }
     
-    //---------��������� ��� sql ��������--------
-    private static String sqlTournamentTable = "SELECT name_division, \n" +
+    String message = "SUCCESS";
+    //-------переменные для sql запросов---------
+    private  String sqlTournamentTable = "SELECT name_division, \n" +
 "	team_name, \n" +
 "       games, \n" +
 "       wins,\n" +
@@ -33,7 +48,7 @@ public class DataBaseRequest {
 "       logo \n" +
 "       FROM football_main.v_tournament_table\n" +
 "       where id_division = ?;";
-    private static String sqlPrevMatches = "SELECT id_match, name_division, \n" +
+    private  String sqlPrevMatches = "SELECT id_match, name_division, \n" +
 "	id_division, \n" +
 "       id_tour, \n" +
 "       team_home, \n" +
@@ -48,7 +63,7 @@ public class DataBaseRequest {
 "       FROM football_main.v_matches \n" +
 "       where (to_days(curdate()) - to_days(m_date) ) >= 0 and (to_days(curdate()) - to_days(m_date)) < 8\n" +
 "       and id_division = ?;";
-    private static String sqlNextMatches = "SELECT name_division, \n" +
+    private String sqlNextMatches = "SELECT name_division, \n" +
 "       id_tour, \n" +
 "       team_home, \n" +
 "       team_guest, \n" +
@@ -57,7 +72,7 @@ public class DataBaseRequest {
 "       staff_name\n" +
 "       FROM football_main.v_matches m\n" +
 "       where curdate() < m_date and id_division = ?;";
-    private static String sqlSquadInfo = "select team_name, \n" +
+    private  String sqlSquadInfo = "select team_name, \n" +
 "	name, \n" +
 "       name_amplua,\n" +
 "       date_format(birthdate, '%d-%m-%Y') as birthdate,\n" +
@@ -71,7 +86,7 @@ public class DataBaseRequest {
 "       photo\n" +
 "       from v_squad\n" +
 "       where team_name = ?;";
-    private static String sqlAllMatches = "SELECT id_match, name_division, \n" +
+    private  String sqlAllMatches = "SELECT id_match, name_division, \n" +
 "	id_division, \n" +
 "       id_tour, \n" +
 "       team_home, \n" +
@@ -86,7 +101,7 @@ public class DataBaseRequest {
 "       FROM football_main.v_matches m\n" +
 "       where team_home = ? or team_guest = ?\n" +
 "       order by id_tour desc;";
-    private static String sqlPlayersInMatch = "select pm.id_player, pm.name,\n" +
+    private  String sqlPlayersInMatch = "select pm.id_player, pm.name,\n" +
 "	   pm.team_name,\n" +
 "	   pm.number,\n" +
 "       pm.count_goals,\n" +
@@ -99,7 +114,7 @@ public class DataBaseRequest {
 "       from v_players_in_matche pm\n" +
 "       where id_match  = ?";
     //------------------------------------------
-    private static String sqlInsertUsers = "insert into users\n" +
+    private  String sqlInsertUsers = "insert into users\n" +
 "set id_type = 1,\n" +
 "    id_team = 1,\n" +
 "    unique_id = ?,\n" +
@@ -108,44 +123,38 @@ public class DataBaseRequest {
 "    encrypted_password = ?,\n" +
 "    salt = ?,\n" +
 "    created_user = ?;";
-    private static String sqlFindUsers = "select \n" +
+    private  String sqlFindUsers = "select \n" +
 "	encrypted_password,\n" +
 "       salt \n" +
 "       from users\n" +
 "       where email = ?;";
-    //------���������� ��� ��������-------------
-    private static PreparedStatement prTournamentTable;
-    private static PreparedStatement prPrevMatches;
-    private static PreparedStatement prNextMatches;
-    private static PreparedStatement prSquadInfo;
-    private static PreparedStatement prAllMatches;
-    private static PreparedStatement prPlayerInMatch;
-    private static PreparedStatement prInsertUsers;
-    private static PreparedStatement prFindUsers;
+    //------Для подготовки запросов-------------
+    private  PreparedStatement prTournamentTable;
+    private  PreparedStatement prPrevMatches;
+    private  PreparedStatement prNextMatches;
+    private  PreparedStatement prSquadInfo;
+    private  PreparedStatement prAllMatches;
+    private  PreparedStatement prPlayerInMatch;
+    private  PreparedStatement prInsertUsers;
+    private  PreparedStatement prFindUsers;
     //------------------------------------------
-    //------���������� ��� ������������ �����������
-    private static ResultSet rsTournamnetTable;
-    private static ResultSet rsPrevMatches;
-    private static ResultSet rsNextMathces;
-    private static ResultSet rsSquadInfo;
-    private static ResultSet rsAllMatches;
-    private static ResultSet rsPlayerInMatch;
-    private static ResultSet rsFindUsers;
+    //------Курсоры или результаты запросов
+    private  ResultSet rsTournamnetTable;
+    private  ResultSet rsPrevMatches;
+    private  ResultSet rsNextMathces;
+    private  ResultSet rsSquadInfo;
+    private  ResultSet rsAllMatches;
+    private  ResultSet rsPlayerInMatch;
+    private  ResultSet rsFindUsers;
     //------------------------------------------
-    //-----���������� ��� �������� ��������-----
-    private static ArrayList<TournamentTable> tournamentTable = new ArrayList<TournamentTable>();
-    private static ArrayList<PrevMatches> prevMatches = new ArrayList<>();
-    private static ArrayList<NextMatches> nextMatches = new ArrayList<>();
-    private static ArrayList<Player> squadInfo = new ArrayList<>();
+    //-----Масимы классов для вытаскивания информации-----
+    private  ArrayList<TournamentTable> tournamentTable = new ArrayList<TournamentTable>();
+    private  ArrayList<PrevMatches> prevMatches = new ArrayList<>();
+    private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
+    private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
-    public DataBaseRequest(int id) throws SQLException{
-        tournamentTable.clear();
-        prevMatches.clear();
-        nextMatches.clear();
-        connection(id);
-    }
     
-    public DataBaseRequest(String name_team, String message, int id_match)throws SQLException{
+    /*public DataBaseRequest(String name_team, String message, int id_match)throws SQLException{
         squadInfo.clear();
         prevMatches.clear();
         switch (message) {
@@ -159,17 +168,18 @@ public class DataBaseRequest {
                 connection_allMatches(name_team);
                 break;
         }
-    }
-    public DataBaseRequest(UsersLogin user_info, String name, String email) throws SQLException{
+    }*/
+    /*public DataBaseRequest(UsersLogin user_info, String name, String email) throws SQLException{
         connection_register(user_info, name, email);
     }
     
     public DataBaseRequest(String email, String password) throws SQLException{
         connection_login(email, password);
-    }
-    private static void connection_login(String email, String passwordUser) throws SQLException{
+    }*/
+    
+    
+    void connection_login(String email, String passwordUser) throws SQLException{
         try {
-            connect = DriverManager.getConnection(url, user, password);
             prFindUsers = connect.prepareCall(sqlFindUsers);
             prFindUsers.setString(1, email);
             rsFindUsers = prFindUsers.executeQuery();
@@ -178,14 +188,12 @@ public class DataBaseRequest {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
             message = ex.getMessage();
         }finally{
-            connect.close();
             rsFindUsers.close();
         }
     }
     
-    private static void connection_register(UsersLogin user_info, String name, String email) throws SQLException{
+    void connection_register(UsersLogin user_info, String name, String email) throws SQLException{
         try {
-            connect = DriverManager.getConnection(url, user, password);
             prInsertUsers = connect.prepareCall(sqlInsertUsers);
             prInsertUsers.setString(1, user_info.getUniqId());
             prInsertUsers.setString(2, name);
@@ -201,24 +209,25 @@ public class DataBaseRequest {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
             message = ex.getMessage();
         }finally{
-            connect.close();
             prInsertUsers.close();
         }
     }
     
-    private static void connection(int id_div) throws SQLException{
+    void connection_main_activity(int id_div) throws SQLException{
         try {
-            connect = DriverManager.getConnection(url, user, password);
-            //����������� ��������� �������
+            tournamentTable.clear();
+            prevMatches.clear();
+            nextMatches.clear();
+            //Вытаскиваем турнирную таблицу
             prTournamentTable = connect.prepareCall(sqlTournamentTable);
             prTournamentTable.setInt(1, id_div);
             rsTournamnetTable = prTournamentTable.executeQuery();
             getTournamentTable(rsTournamnetTable);
-            //����������� ��������� �����
+            //Сыгранные матчи
             prPrevMatches = connect.prepareCall(sqlPrevMatches);
             prPrevMatches.setInt(1, id_div);
             rsPrevMatches = prPrevMatches.executeQuery();
-            //����������� ������� �����
+            //Будущие матчи
             getPrevMatches(rsPrevMatches);
             prNextMatches = connect.prepareCall(sqlNextMatches);
             prNextMatches.setInt(1, id_div);
@@ -233,9 +242,8 @@ public class DataBaseRequest {
         }
     }
     
-    private static void connection(String name_team) throws SQLException{
+    void connection_squad_info(String name_team) throws SQLException{
         try {
-            connect = DriverManager.getConnection(url, user, password);
             prSquadInfo = connect.prepareCall(sqlSquadInfo);
             prSquadInfo.setString(1, name_team);
             rsSquadInfo = prSquadInfo.executeQuery();
@@ -243,14 +251,12 @@ public class DataBaseRequest {
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            connect.close();
             rsSquadInfo.close();
         }
     }
     
-    private static void connection_allMatches(String name_team) throws SQLException{
+    void connection_allMatches(String name_team) throws SQLException{
         try {
-            connect = DriverManager.getConnection(url, user, password);
             prAllMatches = connect.prepareCall(sqlAllMatches);
             prAllMatches.setString(1, name_team);
             prAllMatches.setString(2, name_team);
@@ -259,14 +265,12 @@ public class DataBaseRequest {
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            connect.close();
             rsAllMatches.close();
         }
     }
     
-    private static void connection_playerInMatch(int id_match) throws SQLException{
+    void connection_playerInMatch(int id_match) throws SQLException{
         try {
-            connect = DriverManager.getConnection(url, user, password);
             prPlayerInMatch = connect.prepareCall(sqlPlayersInMatch);
             prPlayerInMatch.setInt(1,id_match);
             rsPlayerInMatch = prPlayerInMatch.executeQuery();
@@ -274,11 +278,10 @@ public class DataBaseRequest {
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            connect.close();
             rsPlayerInMatch.close();
         }
     }
-    private static void getTournamentTable(ResultSet result){
+    private  void getTournamentTable(ResultSet result){
         String queryOutput = "";
         try {
             while(result.next()){
@@ -305,7 +308,7 @@ public class DataBaseRequest {
         }
     }
 
-    private static void getPrevMatches(ResultSet result){
+    private  void getPrevMatches(ResultSet result){
         String queryOutput = "";
         try {
             while(result.next()){
@@ -330,7 +333,7 @@ public class DataBaseRequest {
         }
     }
     
-    private static void getNextMatches(ResultSet result){
+    private  void getNextMatches(ResultSet result){
         String queryOutput = "";
         try {
             while(result.next()){
@@ -350,7 +353,7 @@ public class DataBaseRequest {
         }
     }
     
-    private static void getSquadInfo(ResultSet result){
+    private  void getSquadInfo(ResultSet result){
         String queryOutput = "";
         try {
             while(result.next()){
@@ -376,7 +379,7 @@ public class DataBaseRequest {
         }
     }
     
-    private static void getAllMatches(ResultSet result){
+    private  void getAllMatches(ResultSet result){
         String queryOutput = "";
         try {
             while(result.next()){
@@ -399,7 +402,7 @@ public class DataBaseRequest {
         }
     }
     
-    private static void getPlayerInMatch(ResultSet result){
+    private  void getPlayerInMatch(ResultSet result){
         String queryOutput = "";
         try{
             while(result.next()){
@@ -425,7 +428,7 @@ public class DataBaseRequest {
         }
     }
     
-    private static void checkUser(ResultSet result, String password){
+    private  void checkUser(ResultSet result, String password){
         String encryptedPassword = null;
         String salt = "";
         try {
@@ -446,23 +449,23 @@ public class DataBaseRequest {
         }
     }
     
-    public static ArrayList<TournamentTable> getTournamentTable() {
-        return DataBaseRequest.tournamentTable;
+    public  ArrayList<TournamentTable> getTournamentTable() {
+        return tournamentTable;
     }
     
-   public static ArrayList<PrevMatches> getPrevMatches(){
-       return DataBaseRequest.prevMatches;
+   public  ArrayList<PrevMatches> getPrevMatches(){
+       return prevMatches;
    }
 
-    public static ArrayList<NextMatches> getNextMatches() {
-        return DataBaseRequest.nextMatches;
+    public  ArrayList<NextMatches> getNextMatches() {
+        return nextMatches;
     }
 
-    public static ArrayList<Player> getSquadInfo() {
+    public  ArrayList<Player> getSquadInfo() {
         return squadInfo;
     }
 
-    public static String getMessage() {
+    public  String getMessage() {
         return message;
     }
 
