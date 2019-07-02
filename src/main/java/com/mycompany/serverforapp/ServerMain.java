@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Markable ветка Маркуши
+ * @author Markable ветка для обшего тестирования
  */
 public class ServerMain {
     
