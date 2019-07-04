@@ -27,12 +27,12 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Markable
+ * @author Markable ветка не твоя. Моя!
  */
 public class ServerMain {
     
     static ExecutorService executeIt = Executors.newFixedThreadPool(10);
-    
+   
     /**
      * @param args the command line arguments
      */
@@ -47,7 +47,7 @@ public class ServerMain {
                 System.out.println("Waiting for a response from the client");
                 Socket fromclient = server.accept();
                 executeIt.execute(new ThreadClient(fromclient, number));
-                number++;
+                number++; 
                 //executeIt.shutdown();
             }
                 
@@ -79,7 +79,7 @@ class ThreadClient implements Runnable {
     DataInputStream in;
     DataOutputStream out;
     //DataOutputStream outTournamentTable;
-    
+    DataBaseRequest dbr = DataBaseRequest.getInstance();
     MessageToJson messageToJson;
     
     Gson gson = new Gson();
@@ -115,16 +115,16 @@ class ThreadClient implements Runnable {
                         break exit;
                     case "division":
                         id_division = messageToJson.getId_division();
-                        DataBaseRequest baseRequest = new DataBaseRequest(id_division);
-                        tournamentArray = baseRequest.getTournamentTable();
+                        dbr.connection_main_activity(id_division);
+                        tournamentArray = dbr.getTournamentTable();
                         String tournamentTableToJson = gson.toJson(tournamentArray);
                 
                         //prevMatchesArray = baseQuery.getResultsPrevMatches();
-                        prevMatchesArray = baseRequest.getPrevMatches();
+                        prevMatchesArray = dbr.getPrevMatches();
                         String prevMatchesToJson = gson.toJson(prevMatchesArray);
                 
                         //nextMatchesArray = baseQuery.getCalendar();
-                        nextMatchesArray = baseRequest.getNextMatches();
+                        nextMatchesArray = dbr.getNextMatches();
                         String nextMatchesToJson = gson.toJson(nextMatchesArray);
                 
                         System.out.println("[1]Array of object from DB to JSON");
@@ -189,10 +189,9 @@ class ThreadClient implements Runnable {
                         byte[] decode = Base64.getDecoder().decode(id_team.getBytes());
                         id_team = new String(decode);
                         System.out.println("New id_team = " + id_team);
-                        //DataBaseQuery baseQuery1 = new DataBaseQuery(id_division, id_team);
-                        //playersArray = baseQuery1.getPlayerArray();
-                        DataBaseRequest baseRequest1 = new DataBaseRequest(id_team,messageLogic, 0);
-                        playersArray = baseRequest1.getSquadInfo();
+                        dbr.connection_squad_info(id_team);
+                        //DataBaseRequest baseRequest1 = new DataBaseRequest(id_team,messageLogic, 0);
+                        playersArray = dbr.getSquadInfo();
                         String playersToJson = gson.toJson(playersArray);
                         System.out.println("[4]Array of object from DB to JSON");
                         System.out.println(playersToJson);
@@ -232,8 +231,8 @@ class ThreadClient implements Runnable {
                     case "player":
                         System.out.println("Case matches for player");
                         id_division = messageToJson.getId_division();
-                        DataBaseRequest request = new DataBaseRequest(null, messageLogic, id_division);
-                        playersArray = request.getSquadInfo();
+                        dbr.connection_playerInMatch(id_division);
+                        playersArray = dbr.getSquadInfo();
                         String playerInMatchToJson = gson.toJson(playersArray);
                         System.out.println("[6]Array of object from DB to JSON");
                         System.out.println(playerInMatchToJson);
@@ -241,9 +240,7 @@ class ThreadClient implements Runnable {
                         break;
                     case "matches":
                         System.out.println("Case matches for team");
-                        DataBaseRequest dbr = new DataBaseRequest(id_team, messageLogic, 0);
-                        //DataBaseQuery baseQueryAllMatches = new DataBaseQuery(id_division, id_team);
-                        //allMatchesArray = baseQueryAllMatches.getAllMatches();
+                        dbr.connection_allMatches(id_team);
                         prevMatchesArray = dbr.getPrevMatches();
                         String prevAllMatchesForTeamToJson = gson.toJson(prevMatchesArray);
                         System.out.println("[5]Array of object from DB to JSON");
@@ -306,23 +303,20 @@ class ThreadClient implements Runnable {
                         System.out.println("CASE register");
                         user_info = messageToJson.getUser_info();
                         System.out.println(user_info);
-                        //byte[] decodeByte = Base64.getDecoder().decode(user_info.team.getBytes());
-                        //String team = new String(decodeByte);
                         UsersLogin regist = new UsersLogin(user_info.password);
                         System.out.println("Encoded password = " + regist.getEncodePassword());
-                        //byte[] decodeByte = Base64.getDecoder().decode(login.getEncodePassword().getBytes());
-                        //System.out.println(new String(decodeByte));
-                        DataBaseRequest addUser = new DataBaseRequest(regist, user_info.name, user_info.email);
-                        System.out.println("Message from db = " + addUser.getMessage());
-                        out.writeUTF(addUser.getMessage());
+                        dbr.connection_register(regist,user_info.name, user_info.email);
+                        System.out.println("Message from db = " + dbr.getMessage());
+                        out.writeUTF(dbr.getMessage());
                         break;
                     case "login":
                         System.out.println("CASE login");
                         user_info = messageToJson.getUser_info();
                         System.out.println(user_info);
-                        DataBaseRequest checkUser = new DataBaseRequest(user_info.email, user_info.password);
-                        System.out.println("Message from db = " + checkUser.getMessage());
-                        out.writeUTF(checkUser.getMessage());
+                        dbr.connection_login(user_info.email, user_info.password);
+                        String response = gson.toJson(new MessageToJson(dbr.getMessage(),1));
+                        System.out.println("Message from db = " + dbr.getMessage());
+                        out.writeUTF(response);
                         break;
                 }//case 
             }//while 
