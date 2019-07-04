@@ -303,14 +303,9 @@ class ThreadClient implements Runnable {
                         System.out.println("CASE register");
                         user_info = messageToJson.getUser_info();
                         System.out.println(user_info);
-                        //byte[] decodeByte = Base64.getDecoder().decode(user_info.team.getBytes());
-                        //String team = new String(decodeByte);
                         UsersLogin regist = new UsersLogin(user_info.password);
                         System.out.println("Encoded password = " + regist.getEncodePassword());
-                        //byte[] decodeByte = Base64.getDecoder().decode(login.getEncodePassword().getBytes());
-                        //System.out.println(new String(decodeByte));
                         dbr.connection_register(regist,user_info.name, user_info.email);
-                        //DataBaseRequest addUser = new DataBaseRequest(regist, user_info.name, user_info.email);
                         System.out.println("Message from db = " + dbr.getMessage());
                         out.writeUTF(dbr.getMessage());
                         break;
@@ -319,9 +314,9 @@ class ThreadClient implements Runnable {
                         user_info = messageToJson.getUser_info();
                         System.out.println(user_info);
                         dbr.connection_login(user_info.email, user_info.password);
-                        //DataBaseRequest checkUser = new DataBaseRequest(user_info.email, user_info.password);
+                        String response = gson.toJson(new MessageToJson(dbr.getMessage(),1));
                         System.out.println("Message from db = " + dbr.getMessage());
-                        out.writeUTF(dbr.getMessage());
+                        out.writeUTF(response);
                         break;
                 }//case 
             }//while 
