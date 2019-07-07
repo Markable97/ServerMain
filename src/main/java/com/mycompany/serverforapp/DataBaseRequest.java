@@ -204,6 +204,7 @@ public class DataBaseRequest {
             SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             prInsertUsers.setString(6, formatForDateNow.format(dateNow.getTime()));
             prInsertUsers.execute();
+            message = "SUCCESS";
                   
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);

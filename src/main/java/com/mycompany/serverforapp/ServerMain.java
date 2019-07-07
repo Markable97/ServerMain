@@ -307,7 +307,8 @@ class ThreadClient implements Runnable {
                         System.out.println("Encoded password = " + regist.getEncodePassword());
                         dbr.connection_register(regist,user_info.name, user_info.email);
                         System.out.println("Message from db = " + dbr.getMessage());
-                        out.writeUTF(dbr.getMessage());
+                        String responseRegister = gson.toJson(new MessageToJson(dbr.getMessage()));
+                        out.writeUTF(responseRegister);
                         break;
                     case "login":
                         System.out.println("CASE login");
