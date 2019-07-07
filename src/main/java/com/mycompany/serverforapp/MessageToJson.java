@@ -37,6 +37,10 @@ public class MessageToJson {
          this.settingForApp = setting;
      }
 
+    public MessageToJson(String responseFromServer) {
+        this.responseFromServer = responseFromServer;
+    }
+     
     public String getMessageLogic() {
         return messageLogic;
     }

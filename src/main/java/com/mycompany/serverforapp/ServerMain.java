@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class ServerMain {
     
-    static ExecutorService executeIt = Executors.newFixedThreadPool(10);
+    static ExecutorService executeIt = Executors.newFixedThreadPool(1);
    
     /**
      * @param args the command line arguments
@@ -307,7 +307,8 @@ class ThreadClient implements Runnable {
                         System.out.println("Encoded password = " + regist.getEncodePassword());
                         dbr.connection_register(regist,user_info.name, user_info.email);
                         System.out.println("Message from db = " + dbr.getMessage());
-                        out.writeUTF(dbr.getMessage());
+                        String responseRegister = gson.toJson(new MessageToJson(dbr.getMessage()));
+                        out.writeUTF(responseRegister);
                         break;
                     case "login":
                         System.out.println("CASE login");
@@ -328,9 +329,20 @@ class ThreadClient implements Runnable {
             //outTournamentTable.close();
             fromclient.close();
         } catch (IOException ex) {
+            System.out.println("User turn off: " + ex.getLocalizedMessage());
             
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            try {
+                System.out.println("Disconnect client, close channels....");
+                in.close();
+                out.close();
+                fromclient.close();
+                System.out.println("waiting for a new client*********");
+            } catch (IOException ex) {
+                Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
