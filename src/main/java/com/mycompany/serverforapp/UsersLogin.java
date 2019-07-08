@@ -101,5 +101,5 @@ public class UsersLogin {
     public String getUniqId() {
         return uniqId;
     }
-    
+
 }

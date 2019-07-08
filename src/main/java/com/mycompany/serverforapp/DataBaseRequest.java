@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 public class DataBaseRequest {
     
     public static DataBaseRequest db;
+    private int settingForApp;
     Connection connect;
     private DataBaseRequest(){
        String user = "root";
@@ -126,6 +127,7 @@ public class DataBaseRequest {
     private  String sqlFindUsers = "select \n" +
 "	encrypted_password,\n" +
 "       salt \n" +
+"       id_type \n" +
 "       from users\n" +
 "       where email = ?;";
     //------Для подготовки запросов-------------
@@ -180,6 +182,7 @@ public class DataBaseRequest {
     
     void connection_login(String email, String passwordUser) throws SQLException{
         try {
+            settingForApp = 0;
             prFindUsers = connect.prepareCall(sqlFindUsers);
             prFindUsers.setString(1, email);
             rsFindUsers = prFindUsers.executeQuery();
@@ -436,6 +439,7 @@ public class DataBaseRequest {
             while (result.next()){
                 encryptedPassword = result.getString(1);
                 salt = result.getString(2);
+                settingForApp = result.getInt(3);
             }
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);

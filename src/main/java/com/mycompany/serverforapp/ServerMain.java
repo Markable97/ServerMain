@@ -315,7 +315,7 @@ class ThreadClient implements Runnable {
                         user_info = messageToJson.getUser_info();
                         System.out.println(user_info);
                         dbr.connection_login(user_info.email, user_info.password);
-                        String response = gson.toJson(new MessageToJson(dbr.getMessage(),1));
+                        String response = gson.toJson(new MessageToJson(dbr.getMessage(),dbr.getSettingForApp()));
                         System.out.println("Message from db = " + dbr.getMessage());
                         out.writeUTF(response);
                         break;
