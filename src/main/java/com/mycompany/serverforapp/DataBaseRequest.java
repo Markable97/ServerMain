@@ -474,6 +474,9 @@ public class DataBaseRequest {
         return message;
     }
 
+    public int getSettingForApp() {
+        return settingForApp;
+    }
 
     
 }
