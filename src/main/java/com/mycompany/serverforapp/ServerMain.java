@@ -137,50 +137,8 @@ class ThreadClient implements Runnable {
                         out.writeUTF(tournamentTableToJson);
                         out.writeUTF(prevMatchesToJson);
                         out.writeUTF(nextMatchesToJson);
-                        //начало ветки
-                        System.out.println("Добавляю потоки для файлов");
-                        String path = "D:\\Учеба\\Диплом\\Логотипы команд\\";
-                        String pathBig = "D:\\Учеба\\Диплом\\Логотипы команд\\BigImage\\"; 
-                        int cnt_photo = 0; //кол-во существующих фоток
-                        for(int i = 0; i < tournamentArray.size(); i++){
-                            File image = new File(path + tournamentArray.get(i).getUrlImage());
-                            File imageBig = new File(pathBig + tournamentArray.get(i).getUrlImage());
-                            if(image.exists()){
-                                if(imageBig.exists()){
-                                    System.out.println("Файлы существует " + image.getName() + " " + imageBig.getName());
-                                    cnt_photo++;    
-                                }else{
-                                    System.out.println("BIG Файл "+ tournamentArray.get(i).getUrlImage() +" не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                    }
-                            }else{
-                                System.out.println("Файл "+tournamentArray.get(i).getUrlImage() +"не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            }
-                        }
-                        out.writeInt(cnt_photo);//кол-во фоток
-                        if(cnt_photo > 0){
-                            for(int i = 0; i < tournamentArray.size(); i++){
-                                File image = new File(path + tournamentArray.get(i).getUrlImage());
-                                File imageBig = new File(pathBig + tournamentArray.get(i).getUrlImage());
-                                if(image.exists()){
-                                    if(imageBig.exists()){
-                                        System.out.println("Файлы существует " + image.getName() + " " + imageBig.getName());
-                                        String nameImage = tournamentArray.get(i).getUrlImage().replace(".png",""); 
-                                        out.writeUTF(nameImage);
-                                        byte[] byteArrayBig = new byte[(int)imageBig.length()];
-                                        BufferedInputStream streamBig = new BufferedInputStream(new FileInputStream(imageBig));
-                                        streamBig.read(byteArrayBig, 0, byteArrayBig.length);
-                                        streamBig.close();
-                                        out.writeInt(byteArrayBig.length);
-                                        out.write(byteArrayBig);
-                                        //out.flush();
-                                    }else{
-                                        System.out.println("BIG Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                        }
-                                }else{
-                                    System.out.println("Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                                }
-                            }
-                        }
+                        //отправка на клиент
+                        sentFile(tournamentArray);
 
                         break;
                     case "team":
@@ -322,12 +280,12 @@ class ThreadClient implements Runnable {
                 }//case 
             }//while 
            
-            System.out.println("Disconnect client, close channels....");
-            System.out.println("waiting for a new client*********");
-            in.close();
-            out.close();
+            //System.out.println("Disconnect client, close channels....");
+            //System.out.println("waiting for a new client*********");
+            //in.close();
+            //out.close();
             //outTournamentTable.close();
-            fromclient.close();
+            //fromclient.close();
         } catch (IOException ex) {
             System.out.println("User turn off: " + ex.getLocalizedMessage());
             
@@ -342,6 +300,41 @@ class ThreadClient implements Runnable {
                 System.out.println("waiting for a new client*********");
             } catch (IOException ex) {
                 Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    void sentFile(ArrayList<TournamentTable> list) throws IOException{
+        System.out.println("Добавляю потоки для файлов");                        
+        String pathBig = "D:\\Учеба\\Диплом\\Логотипы команд\\BigImage\\"; 
+        int cnt_photo = 0; //кол-во существующих фоток
+        for(int i = 0; i < list.size(); i++){                            
+            File imageBig = new File(pathBig + list.get(i).getUrlImage());                            
+            if(imageBig.exists()){
+                System.out.println("Файлы существует " + imageBig.getName());
+                cnt_photo++;    
+            }else{
+                System.out.println("BIG Файл "+ list.get(i).getUrlImage() +" не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }                            
+        }
+        out.writeInt(cnt_photo); //кол-во файлов
+        if(cnt_photo > 0){
+            for(int i = 0; i < list.size(); i++){                                
+                File imageBig = new File(pathBig + list.get(i).getUrlImage()); 
+                if(imageBig.exists()){
+                    System.out.println("Файлы существует " + imageBig.getName());
+                    String nameImage = tournamentArray.get(i).getUrlImage().replace(".png",""); 
+                    out.writeUTF(nameImage);
+                    byte[] byteArrayBig = new byte[(int)imageBig.length()];
+                    BufferedInputStream streamBig = new BufferedInputStream(new FileInputStream(imageBig));
+                    streamBig.read(byteArrayBig, 0, byteArrayBig.length);
+                    streamBig.close();
+                    out.writeInt(byteArrayBig.length);
+                    out.write(byteArrayBig);
+                    //out.flush();
+               }else{
+                    System.out.println("BIG Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    }                                
             }
         }
     }
