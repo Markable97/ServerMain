@@ -42,11 +42,12 @@ public class ServerMain {
        System.out.println("Enabling the server");
        ServerSocket server = new ServerSocket(55555);
        int number = 0;
+       DataBaseRequest dbr = DataBaseRequest.getInstance();
         try {
             while(!server.isClosed()){
                 System.out.println("Waiting for a response from the client");
                 Socket fromclient = server.accept();
-                executeIt.execute(new ThreadClient(fromclient, number));
+                executeIt.execute(new ThreadClient(fromclient, number, dbr));
                 number++; 
                 //executeIt.shutdown();
             }
@@ -79,13 +80,15 @@ class ThreadClient implements Runnable {
     DataInputStream in;
     DataOutputStream out;
     //DataOutputStream outTournamentTable;
-    DataBaseRequest dbr = DataBaseRequest.getInstance();
+    DataBaseRequest dbr;
     MessageToJson messageToJson;
     
     Gson gson = new Gson();
     
-    public ThreadClient(Socket client, int numberUser) throws IOException{
+    public ThreadClient(Socket client, int numberUser, DataBaseRequest dbr) throws IOException{
         this.fromclient = client;
+        this.dbr = dbr;
+        this.dbr.openConnection();
         System.out.println(client.getInetAddress() + " connection number = " + numberUser);
         in = new DataInputStream(fromclient.getInputStream());
         out = new DataOutputStream(fromclient.getOutputStream());
@@ -144,8 +147,6 @@ class ThreadClient implements Runnable {
                     case "team":
                         System.out.println("Case team");
                         id_team = messageToJson.getId_team();
-                        byte[] decode = Base64.getDecoder().decode(id_team.getBytes());
-                        id_team = new String(decode);
                         System.out.println("New id_team = " + id_team);
                         dbr.connection_squad_info(id_team);
                         //DataBaseRequest baseRequest1 = new DataBaseRequest(id_team,messageLogic, 0);
@@ -292,6 +293,7 @@ class ThreadClient implements Runnable {
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
+            dbr.closeConnection();
             try {
                 System.out.println("Disconnect client, close channels....");
                 in.close();

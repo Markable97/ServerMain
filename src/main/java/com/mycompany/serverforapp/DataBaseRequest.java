@@ -13,13 +13,15 @@ import java.util.logging.Logger;
  */
 public class DataBaseRequest {
     
+    String user = "root";
+    String password = "7913194";
+    String url = "jdbc:mysql://localhost:3306/football_main";
+    
     public static DataBaseRequest db;
     private int settingForApp;
     Connection connect;
     private DataBaseRequest(){
-       String user = "root";
-       String password = "7913194";
-       String url = "jdbc:mysql://localhost:3306/football_main";
+       
         try {
             this.connect = DriverManager.getConnection(url, user, password);
         } catch (SQLException ex) {
@@ -33,7 +35,14 @@ public class DataBaseRequest {
        }
        return db;
    }
-    
+  
+   public void openConnection(){
+        try {
+            this.connect = DriverManager.getConnection(url, user, password);
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+   }
     String message = "SUCCESS";
     //-------переменные для sql запросов---------
     private  String sqlTournamentTable = "SELECT name_division, \n" +
@@ -183,7 +192,7 @@ public class DataBaseRequest {
     void connection_login(String email, String passwordUser) throws SQLException{
         try {
             settingForApp = 0;
-            prFindUsers = connect.prepareCall(sqlFindUsers);
+            prFindUsers = connect.prepareStatement(sqlFindUsers);
             prFindUsers.setString(1, email);
             rsFindUsers = prFindUsers.executeQuery();
             checkUser(rsFindUsers, passwordUser);
@@ -197,7 +206,7 @@ public class DataBaseRequest {
     
     void connection_register(UsersLogin user_info, String name, String email) throws SQLException{
         try {
-            prInsertUsers = connect.prepareCall(sqlInsertUsers);
+            prInsertUsers = connect.prepareStatement(sqlInsertUsers);
             prInsertUsers.setString(1, user_info.getUniqId());
             prInsertUsers.setString(2, name);
             prInsertUsers.setString(3, email);
@@ -223,17 +232,17 @@ public class DataBaseRequest {
             prevMatches.clear();
             nextMatches.clear();
             //Вытаскиваем турнирную таблицу
-            prTournamentTable = connect.prepareCall(sqlTournamentTable);
+            prTournamentTable = connect.prepareStatement(sqlTournamentTable);
             prTournamentTable.setInt(1, id_div);
             rsTournamnetTable = prTournamentTable.executeQuery();
             getTournamentTable(rsTournamnetTable);
             //Сыгранные матчи
-            prPrevMatches = connect.prepareCall(sqlPrevMatches);
+            prPrevMatches = connect.prepareStatement(sqlPrevMatches);
             prPrevMatches.setInt(1, id_div);
             rsPrevMatches = prPrevMatches.executeQuery();
             //Будущие матчи
             getPrevMatches(rsPrevMatches);
-            prNextMatches = connect.prepareCall(sqlNextMatches);
+            prNextMatches = connect.prepareStatement(sqlNextMatches);
             prNextMatches.setInt(1, id_div);
             rsNextMathces = prNextMatches.executeQuery();
             getNextMatches(rsNextMathces);
@@ -248,7 +257,7 @@ public class DataBaseRequest {
     
     void connection_squad_info(String name_team) throws SQLException{
         try {
-            prSquadInfo = connect.prepareCall(sqlSquadInfo);
+            prSquadInfo = connect.prepareStatement(sqlSquadInfo);
             prSquadInfo.setString(1, name_team);
             rsSquadInfo = prSquadInfo.executeQuery();
             getSquadInfo(rsSquadInfo);
@@ -260,8 +269,9 @@ public class DataBaseRequest {
     }
     
     void connection_allMatches(String name_team) throws SQLException{
+        prevMatches.clear();
         try {
-            prAllMatches = connect.prepareCall(sqlAllMatches);
+            prAllMatches = connect.prepareStatement(sqlAllMatches);
             prAllMatches.setString(1, name_team);
             prAllMatches.setString(2, name_team);
             rsAllMatches = prAllMatches.executeQuery();
@@ -275,7 +285,7 @@ public class DataBaseRequest {
     
     void connection_playerInMatch(int id_match) throws SQLException{
         try {
-            prPlayerInMatch = connect.prepareCall(sqlPlayersInMatch);
+            prPlayerInMatch = connect.prepareStatement(sqlPlayersInMatch);
             prPlayerInMatch.setInt(1,id_match);
             rsPlayerInMatch = prPlayerInMatch.executeQuery();
             getPlayerInMatch(rsPlayerInMatch);
@@ -286,6 +296,7 @@ public class DataBaseRequest {
         }
     }
     private  void getTournamentTable(ResultSet result){
+        tournamentTable.clear();
         String queryOutput = "";
         try {
             while(result.next()){
@@ -314,6 +325,7 @@ public class DataBaseRequest {
 
     private  void getPrevMatches(ResultSet result){
         String queryOutput = "";
+        prevMatches.clear();
         try {
             while(result.next()){
                 int id_match = result.getInt("id_match");
@@ -339,6 +351,7 @@ public class DataBaseRequest {
     
     private  void getNextMatches(ResultSet result){
         String queryOutput = "";
+        nextMatches.clear();
         try {
             while(result.next()){
                 String nameDivision = result.getString("name_division");
@@ -385,6 +398,7 @@ public class DataBaseRequest {
     
     private  void getAllMatches(ResultSet result){
         String queryOutput = "";
+        prevMatches.clear();
         try {
             while(result.next()){
                 int id_match = result.getInt("id_match");
@@ -408,6 +422,7 @@ public class DataBaseRequest {
     
     private  void getPlayerInMatch(ResultSet result){
         String queryOutput = "";
+        squadInfo.clear();
         try{
             while(result.next()){
                 int id = result.getInt("id_player");
@@ -451,6 +466,14 @@ public class DataBaseRequest {
             message = "Password successfull";
         }else{
             message = "The password does not match";
+        }
+    }
+    
+    public void closeConnection(){
+        try {
+            connect.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
