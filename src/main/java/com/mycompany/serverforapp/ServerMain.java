@@ -68,7 +68,7 @@ class ThreadClient implements Runnable {
     
     String input;
     String messageLogic;
-    int id_division;
+    int id;
     String id_team;
     MessageRegister user_info;
     
@@ -117,8 +117,8 @@ class ThreadClient implements Runnable {
                         fromclient.close();
                         break exit;
                     case "division":
-                        id_division = messageToJson.getId_division();
-                        dbr.connection_main_activity(id_division);
+                        id = messageToJson.getId();
+                        dbr.connection_main_activity(id);
                         tournamentArray = dbr.getTournamentTable();
                         String tournamentTableToJson = gson.toJson(tournamentArray);
                 
@@ -146,7 +146,7 @@ class ThreadClient implements Runnable {
                         break;
                     case "team":
                         System.out.println("Case team");
-                        id_team = messageToJson.getId_team();
+                        id_team = messageToJson.getTeam_name();
                         System.out.println("New id_team = " + id_team);
                         dbr.connection_squad_info(id_team);
                         //DataBaseRequest baseRequest1 = new DataBaseRequest(id_team,messageLogic, 0);
@@ -159,8 +159,8 @@ class ThreadClient implements Runnable {
                         break;
                     case "player":
                         System.out.println("Case matches for player");
-                        id_division = messageToJson.getId_division();
-                        dbr.connection_playerInMatch(id_division);
+                        id = messageToJson.getId();
+                        dbr.connection_playerInMatch(id);
                         playersArray = dbr.getSquadInfo();
                         String playerInMatchToJson = gson.toJson(playersArray);
                         System.out.println("[6]Array of object from DB to JSON");
@@ -168,8 +168,8 @@ class ThreadClient implements Runnable {
                         out.writeUTF(playerInMatchToJson);
                         break;
                     case "matches":
-                        System.out.println("Case matches for team " + messageToJson.getId_team());
-                        String teamName = messageToJson.getId_team();
+                        System.out.println("Case matches for team " + messageToJson.getTeam_name());
+                        String teamName = messageToJson.getTeam_name();
                         dbr.connection_allMatches(teamName);
                         prevMatchesArray = dbr.getPrevMatches();
                         String prevAllMatchesForTeamToJson = gson.toJson(prevMatchesArray);

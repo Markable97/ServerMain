@@ -12,7 +12,7 @@ package com.mycompany.serverforapp;
  */
 public class MessageToJson {
     String messageLogic;
-    private int id_division;
+    private int id;
     private String team_name;
     private MessageRegister user_info;
     String responseFromServer;
@@ -21,7 +21,7 @@ public class MessageToJson {
 
     public MessageToJson(String messageLogic, int id_division, String id_team, MessageRegister user_info) {
         this.messageLogic = messageLogic;
-        this.id_division = id_division;
+        this.id = id_division;
         this.team_name = id_team;
         this.user_info = user_info;
         
@@ -45,11 +45,11 @@ public class MessageToJson {
         return messageLogic;
     }
     
-    public int getId_division() {
-        return id_division;
+    public int getId() {
+        return id;
     }
 
-    public String getId_team() {
+    public String getTeam_name() {
         return team_name;
     }
 
@@ -67,7 +67,7 @@ public class MessageToJson {
 
     @Override
     public String toString() {
-        return "MessageToJson{" + "messageLogic=" + messageLogic + ", id_division=" + id_division + ", id_team=" + team_name + ", user_info=" + user_info + ", responseFromServer=" + responseFromServer + ", settingForApp=" + settingForApp + '}';
+        return "MessageToJson{" + "messageLogic=" + messageLogic + ", id_division=" + id + ", id_team=" + team_name + ", user_info=" + user_info + ", responseFromServer=" + responseFromServer + ", settingForApp=" + settingForApp + '}';
     }
 
 
