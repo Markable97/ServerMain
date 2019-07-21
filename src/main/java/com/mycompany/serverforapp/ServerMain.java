@@ -155,37 +155,7 @@ class ThreadClient implements Runnable {
                         System.out.println("[4]Array of object from DB to JSON");
                         System.out.println(playersToJson);
                         out.writeUTF(playersToJson);
-                        System.out.println("Открываю потоки для загрузок фоток игроков ");
-                        String pathPlayer = "D:\\Учеба\\Диплом\\Фотки игроков\\";
-                        int countImage = 0;
-                        for(int i = 0; i < playersArray.size(); i++){
-                            File image = new File(pathPlayer + playersArray.get(i).getPlayerTeam() + "\\" +
-                                    playersArray.get(i).getPlayerUrlImage());
-                            System.out.println(image.getPath());
-                            if(image.exists()){
-                                System.out.println("Файл существует " + image.getName());
-                                countImage++;
-                            }else{
-                                System.out.println("Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            }
-                        }
-                        out.writeInt(countImage);//кол-во фоток
-                        for(int i = 0; i < playersArray.size(); i++){
-                            File image = new File(pathPlayer + playersArray.get(i).getPlayerTeam() + "\\" +
-                                    playersArray.get(i).getPlayerUrlImage());
-                            System.out.println(image.getPath());
-                            if(image.exists()){
-                                System.out.println("Файл существует " + image.getName());
-                                byte[] byteImagePlayer = new byte[(int)image.length()];
-                                BufferedInputStream stream = new BufferedInputStream(new FileInputStream(image));
-                                stream.read(byteImagePlayer, 0, byteImagePlayer.length);
-                                stream.close();
-                                out.writeInt(byteImagePlayer.length);
-                                out.write(byteImagePlayer);
-                            }else{
-                                System.out.println("Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            }
-                        }
+                        sentFilePlayer(playersArray);
                         break;
                     case "player":
                         System.out.println("Case matches for player");
@@ -198,63 +168,16 @@ class ThreadClient implements Runnable {
                         out.writeUTF(playerInMatchToJson);
                         break;
                     case "matches":
-                        System.out.println("Case matches for team");
-                        dbr.connection_allMatches(id_team);
+                        System.out.println("Case matches for team " + messageToJson.getId_team());
+                        String teamName = messageToJson.getId_team();
+                        dbr.connection_allMatches(teamName);
                         prevMatchesArray = dbr.getPrevMatches();
                         String prevAllMatchesForTeamToJson = gson.toJson(prevMatchesArray);
                         System.out.println("[5]Array of object from DB to JSON");
                         System.out.println(prevAllMatchesForTeamToJson);
                         out.writeUTF(prevAllMatchesForTeamToJson);
                         System.out.println("Поток для фоток");
-                        String teamPath = "D:\\Учеба\\Диплом\\Логотипы команд\\BigImage\\";
-                        ArrayList<String> listImage = new ArrayList<>();
-                        File imageStart = new File(teamPath + id_team + ".png");
-                        if(imageStart.exists()){
-                            System.out.println("ImageStart = " + imageStart.getName() );
-                            listImage.add(imageStart.getName());
-                        }else{
-                            System.out.println("Image not found");
-                        }
-                        for(int i = 0; i< prevMatchesArray.size(); i++){
-                            File imH = new File(teamPath + prevMatchesArray.get(i).getUrlImageHome());
-                            //System.out.println("Название файла = " + imH.getName() );
-                            File imG = new File(teamPath + prevMatchesArray.get(i).getUrlImageGuest());
-                            //System.out.println("Название файла = " + imG.getName());
-                            if(imH.exists()&& imG.exists()){
-                                if( imH.getName().equals(imageStart.getName()) == false ){
-                                    System.out.println(imH.getName());
-                                    listImage.add(imH.getName());
-                                }
-                                if( imG.getName().equals(imageStart.getName()) == false ){
-                                    System.out.println(imG.getName());
-                                    listImage.add(imG.getName());
-                                }
-                            }
-                            else{
-                                System.out.println("Файлы не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                            }
-                        }
-                        System.out.println("Кол-во файлов = " + listImage.size() + listImage);
-                        out.writeInt(listImage.size());
-                        if(listImage.size()!=0){
-                            for(int i = 0; i < listImage.size(); i++){
-                                File file = new File(teamPath+listImage.get(i));
-                                if(file.exists()){
-                                    System.out.println("Файл существует " + file.getName());
-                                    String nameImage = listImage.get(i).replace(".png","");
-                                    out.writeUTF(nameImage);
-                                    byte[] byteImageTeam = new byte[(int)file.length()];
-                                    BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file));
-                                    stream.read(byteImageTeam, 0, byteImageTeam.length);
-                                    stream.close();
-                                    out.writeInt(byteImageTeam.length);
-                                    out.write(byteImageTeam);
-                                }
-                            }
-                        }
-                        else{
-                            System.out.println("Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        }
+                        sentFileAllMatches(prevMatchesArray, teamName);
                         //out.write(listImage.size());
                         
                         break;
@@ -341,4 +264,94 @@ class ThreadClient implements Runnable {
         }
     }
     
+    void sentFileAllMatches(ArrayList<PrevMatches> list,String teamName) throws IOException{
+        String teamPath = "D:\\Учеба\\Диплом\\Логотипы команд\\BigImage\\";
+        ArrayList<String> listImage = new ArrayList<>();
+        File imageStart = new File(teamPath + teamName + ".png");
+        if(imageStart.exists()){
+            System.out.println("ImageStart = " + imageStart.getName() );
+            listImage.add(imageStart.getName());
+        }else{
+            System.out.println("Image not found");
+        }
+        for(int i = 0; i< list.size(); i++){
+            File imH = new File(teamPath + list.get(i).getUrlImageHome());
+            //System.out.println("Название файла = " + imH.getName() );
+            File imG = new File(teamPath + list.get(i).getUrlImageGuest());
+            //System.out.println("Название файла = " + imG.getName());
+            if(imH.exists()&& imG.exists()){
+                if( imH.getName().equals(imageStart.getName()) == false ){
+                    System.out.println(imH.getName());
+                    listImage.add(imH.getName());
+                }
+                if( imG.getName().equals(imageStart.getName()) == false ){
+                    System.out.println(imG.getName());
+                    listImage.add(imG.getName());
+                }
+            }
+            else{
+                System.out.println("Файлы не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+        }
+        System.out.println("Кол-во файлов = " + listImage.size() + listImage);
+        out.writeInt(listImage.size());
+        if(listImage.size()!=0){
+            for(int i = 0; i < listImage.size(); i++){
+                File file = new File(teamPath+listImage.get(i));
+                if(file.exists()){
+                    System.out.println("Файл существует " + file.getName());
+                    String nameImage = listImage.get(i).replace(".png","");
+                    out.writeUTF(nameImage);
+                    byte[] byteImageTeam = new byte[(int)file.length()];
+                    BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file));
+                    stream.read(byteImageTeam, 0, byteImageTeam.length);
+                    stream.close();
+                    out.writeInt(byteImageTeam.length);
+                    out.write(byteImageTeam);
+                }
+            }
+        }
+        else{
+            System.out.println("Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+    }
+    
+    void sentFilePlayer(ArrayList<Player> list) throws IOException{
+        String pathPlayer = "D:\\Учеба\\Диплом\\Фотки игроков\\";
+        int countImage = 0;
+        for(int i = 0; i < list.size(); i++){
+            File image = new File(pathPlayer + list.get(i).getPlayerTeam() + "\\" +
+                    list.get(i).getPlayerUrlImage());
+            System.out.println(image.getPath());
+            if(image.exists()){
+                System.out.println("Файл существует " + image.getName());
+                countImage++;
+            }else{
+                System.out.println("Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+        }
+        System.out.println("Кол-во найденных фотографий = " + countImage);
+        out.writeInt(countImage);//кол-во фоток
+        if(countImage > 0){
+            for(int i = 0; i < list.size(); i++){
+                File image = new File(pathPlayer + list.get(i).getPlayerTeam() + "\\" +
+                        list.get(i).getPlayerUrlImage());
+                System.out.println(image.getPath());
+                if(image.exists()){
+                    System.out.println("Файл существует " + image.getName());
+                    String nameImage = image.getName();
+                    out.writeUTF(nameImage);
+                    byte[] byteImagePlayer = new byte[(int)image.length()];
+                    BufferedInputStream stream = new BufferedInputStream(new FileInputStream(image));
+                    stream.read(byteImagePlayer, 0, byteImagePlayer.length);
+                    stream.close();
+                    out.writeInt(byteImagePlayer.length);
+                    out.write(byteImagePlayer);
+                }else{
+                    System.out.println("Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+            }
+        }
+        
+    }
 }

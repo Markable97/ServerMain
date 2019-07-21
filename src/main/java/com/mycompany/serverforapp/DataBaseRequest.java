@@ -372,6 +372,7 @@ public class DataBaseRequest {
     
     private  void getSquadInfo(ResultSet result){
         String queryOutput = "";
+        squadInfo.clear();
         try {
             while(result.next()){
                 String team_name = result.getString("team_name");
