@@ -135,7 +135,7 @@ public class DataBaseRequest {
 "    created_user = ?;";
     private  String sqlFindUsers = "select \n" +
 "	encrypted_password,\n" +
-"       salt \n" +
+"       salt, \n" +
 "       id_type \n" +
 "       from users\n" +
 "       where email = ?;";
