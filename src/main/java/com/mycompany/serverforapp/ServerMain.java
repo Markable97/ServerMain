@@ -69,6 +69,7 @@ class ThreadClient implements Runnable {
     String input;
     String messageLogic;
     int id;
+    int tour;
     String id_team;
     MessageRegister user_info;
     
@@ -200,6 +201,16 @@ class ThreadClient implements Runnable {
                         String response = gson.toJson(new MessageToJson(dbr.getMessage(),dbr.getSettingForApp()));
                         System.out.println("Message from db = " + dbr.getMessage());
                         out.writeUTF(response);
+                        break;
+                    case "getTour":
+                     
+                        id = messageToJson.getId();
+                        tour = messageToJson.getTour();
+                        System.out.println("CASE getTour id = " + id + " tour = " + tour);
+                        dbr.connection_getTour(id, tour);
+                        String tour_JSON = gson.toJson(dbr.getNextMatches());
+                        System.out.println("Message from db = " + tour_JSON);
+                        out.writeUTF(tour_JSON);
                         break;
                 }//case 
             }//while 

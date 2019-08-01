@@ -13,10 +13,12 @@ package com.mycompany.serverforapp;
 public class MessageToJson {
     String messageLogic;
     private int id;
+    int tour;
     private String team_name;
     private MessageRegister user_info;
     String responseFromServer;
     int settingForApp; 
+    
     
 
     public MessageToJson(String messageLogic, int id_division, String id_team, MessageRegister user_info) {
@@ -63,6 +65,10 @@ public class MessageToJson {
 
     public int getSettingForApp() {
         return settingForApp;
+    }
+
+    public int getTour() {
+        return tour;
     }
 
     @Override

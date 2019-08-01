@@ -13,6 +13,7 @@ package com.mycompany.serverforapp;
 public class NextMatches {
     
     private String nameDivision;
+    private int idMatch;
     private int idTour;
     private String teamHome;
     private String teamVisit;
@@ -28,6 +29,13 @@ public class NextMatches {
         this.nameStadium = nameStadium;
     }
 
+    public NextMatches(int idMatch, int idTour, String teamHome, String teamVisit) {
+        this.idMatch = idMatch;
+        this.idTour = idTour;
+        this.teamHome = teamHome;
+        this.teamVisit = teamVisit;
+    }
+            
     public String getNameDivision() {
         return nameDivision;
     }

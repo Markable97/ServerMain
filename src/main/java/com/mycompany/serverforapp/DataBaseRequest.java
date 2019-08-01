@@ -139,6 +139,10 @@ public class DataBaseRequest {
 "       id_type \n" +
 "       from users\n" +
 "       where email = ?;";
+    private String sqlGetTour = "select id_match, id_tour, team_home, team_guest\n" +
+"from v_matches \n" +
+"where id_season = 3 and m_date is null\n" +
+"and goal_home is null and goal_guest is null and id_tour = ? and id_division = ?";
     //------Для подготовки запросов-------------
     private  PreparedStatement prTournamentTable;
     private  PreparedStatement prPrevMatches;
@@ -148,6 +152,7 @@ public class DataBaseRequest {
     private  PreparedStatement prPlayerInMatch;
     private  PreparedStatement prInsertUsers;
     private  PreparedStatement prFindUsers;
+    private  PreparedStatement prGetTour;
     //------------------------------------------
     //------Курсоры или результаты запросов
     private  ResultSet rsTournamnetTable;
@@ -157,6 +162,7 @@ public class DataBaseRequest {
     private  ResultSet rsAllMatches;
     private  ResultSet rsPlayerInMatch;
     private  ResultSet rsFindUsers;
+    private  ResultSet rsGetTour;
     //------------------------------------------
     //-----Масимы классов для вытаскивания информации-----
     private  ArrayList<TournamentTable> tournamentTable = new ArrayList<TournamentTable>();
@@ -295,6 +301,23 @@ public class DataBaseRequest {
             rsPlayerInMatch.close();
         }
     }
+    
+    void connection_getTour(int id_division, int id_tour) throws SQLException{
+        try{
+            prGetTour = connect.prepareStatement(sqlGetTour);
+            prGetTour.setInt(1, id_tour);
+            prGetTour.setInt(2, id_division);
+            rsGetTour = prGetTour.executeQuery();
+            getTour(rsGetTour);
+            
+        }catch (SQLException ex){
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            rsGetTour.close();
+            prGetTour.close();
+        }
+    }
+    
     private  void getTournamentTable(ResultSet result){
         tournamentTable.clear();
         String queryOutput = "";
@@ -445,6 +468,24 @@ public class DataBaseRequest {
             System.out.println("DataBaseRequest getPlayerInMatch():output query  from DB:" + queryOutput);
         }catch(SQLException ex){
              Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void getTour(ResultSet result){
+        String queryOutput = "";
+        nextMatches.clear();
+        try {
+            while(result.next()){
+                int id_match = result.getInt("id_match");
+                int id_tour = result.getInt("id_tour");
+                String team_home = result.getString("team_home");
+                String team_guest = result.getString("team_guest");
+                queryOutput += id_match + " " + id_tour + " " + team_home + " " + team_guest + "\n";
+                nextMatches.add(new NextMatches(id_match, id_tour, team_home, team_guest));
+            }
+            System.out.println("Список матчей тура: \n" + queryOutput);
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
