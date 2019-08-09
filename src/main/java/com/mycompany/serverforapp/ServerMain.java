@@ -203,7 +203,7 @@ class ThreadClient implements Runnable {
                         out.writeUTF(response);
                         break;
                     case "getTour":
-                     
+                        System.out.println("CASE getTour");
                         id = messageToJson.getId();
                         tour = messageToJson.getTour();
                         System.out.println("CASE getTour id = " + id + " tour = " + tour);
@@ -211,6 +211,15 @@ class ThreadClient implements Runnable {
                         String tour_JSON = gson.toJson(dbr.getNextMatches());
                         System.out.println("Message from db = " + tour_JSON);
                         out.writeUTF(tour_JSON);
+                        int cntStadiums = dbr.getCntStadium(id);
+                        System.out.println("Count stadiums = " + cntStadiums);
+                        out.writeUTF(String.valueOf(cntStadiums));
+                        String stadiums = dbr.getNameStadium(id);
+                        System.out.println("Name stadiums = " + stadiums);
+                        out.writeUTF(stadiums);
+                        String schedule_JSON = gson.toJson(dbr.getSchedule(id));
+                        System.out.println("Message from db = " + schedule_JSON);
+                        out.writeUTF(schedule_JSON);
                         break;
                 }//case 
             }//while 

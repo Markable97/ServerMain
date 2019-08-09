@@ -139,11 +139,24 @@ public class DataBaseRequest {
 "       id_type \n" +
 "       from users\n" +
 "       where email = ?;";
-    private String sqlGetTour = "select id_match, id_tour, team_home, team_guest\n" +
+    private String sqlGetTour = "select id_match, id_tour, team_home, team_guest, m_date, name_stadium\n" +
 "from v_matches \n" +
-"where id_season = 3 and m_date is null\n" +
+"where id_season = 3 \n" +
 "and goal_home is null and goal_guest is null and id_tour = ? and id_division = ?";
+    private String sqlCountStadiums = "select count(1) cnt_stadium\n" +
+"from(    \n" +
+"select distinct id_stadium from dayofmatch\n" +
+"where id_tour = ?) t";
+    private String sqlNameStadiums = "select distinct name_stadium \n" +
+"from v_dayofmatch\n" +
+"where id_tour = ?";
+    private String sqlScheduleTime = "select match_date, match_time, id_stadium, \n" +
+"	   id_tour, name_stadium, id_match, \n" +
+"       team_home,team_guest \n" +
+"from v_dayofmatch \n" +
+"where id_tour = ?;";
     //------Для подготовки запросов-------------
+    private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
     private  PreparedStatement prPrevMatches;
     private  PreparedStatement prNextMatches;
@@ -153,8 +166,10 @@ public class DataBaseRequest {
     private  PreparedStatement prInsertUsers;
     private  PreparedStatement prFindUsers;
     private  PreparedStatement prGetTour;
+    private  PreparedStatement prCntStadiums;
     //------------------------------------------
     //------Курсоры или результаты запросов
+    private  ResultSet resultSet;
     private  ResultSet rsTournamnetTable;
     private  ResultSet rsPrevMatches;
     private  ResultSet rsNextMathces;
@@ -163,6 +178,7 @@ public class DataBaseRequest {
     private  ResultSet rsPlayerInMatch;
     private  ResultSet rsFindUsers;
     private  ResultSet rsGetTour;
+    private  ResultSet rsCntStadiums;
     //------------------------------------------
     //-----Масимы классов для вытаскивания информации-----
     private  ArrayList<TournamentTable> tournamentTable = new ArrayList<TournamentTable>();
@@ -193,7 +209,71 @@ public class DataBaseRequest {
     public DataBaseRequest(String email, String password) throws SQLException{
         connection_login(email, password);
     }*/
+    ArrayList<Schedule> getSchedule(int idTour) throws SQLException{
+        ArrayList<Schedule> list = new ArrayList<>();
+        try {
+            preparetStatement = connect.prepareStatement(sqlScheduleTime);
+            preparetStatement.setInt(1, idTour);
+            resultSet = preparetStatement.executeQuery();
+            while(resultSet.next()){
+                String match_date = resultSet.getString(1);
+                String match_time = resultSet.getString(2);
+                int id_stadium = resultSet.getInt(3);
+                int id_tour = resultSet.getInt(4);
+                String name_stadium = resultSet.getString(5);
+                int id_match = resultSet.getInt(6);;
+                String team_home = resultSet.getString(7);
+                String team_guest = resultSet.getString(8);
+                list.add(new Schedule(match_date, match_time, id_stadium, id_tour, 
+                        name_stadium, id_match, team_home, team_guest));
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            resultSet.close();
+            preparetStatement.close();
+        }
+        System.out.println("Scheduke from DB: \n" + list.toString());
+        return list;
+    }
     
+    String getNameStadium(int id_tour) throws SQLException{
+        String stadiums = "";
+        try {
+            preparetStatement = connect.prepareStatement(sqlNameStadiums);
+            preparetStatement.setInt(1, id_tour);
+            resultSet = preparetStatement.executeQuery();
+            while(resultSet.next()){
+                stadiums +=" " + resultSet.getString(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            resultSet.close();
+            preparetStatement.close();
+        }
+        return stadiums.trim();
+    }
+    
+    int getCntStadium(int id_tour) throws SQLException{
+        try {
+            prCntStadiums = connect.prepareStatement(sqlCountStadiums);
+            prCntStadiums.setInt(1, id_tour);
+            rsCntStadiums = prCntStadiums.executeQuery();
+            int cnt = 0;
+            while(rsCntStadiums.next()){
+                cnt = rsCntStadiums.getInt(1);
+            }
+            return cnt;
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            rsCntStadiums.close();
+            prCntStadiums.close();
+        }
+        return 0;
+    }
     
     void connection_login(String email, String passwordUser) throws SQLException{
         try {
@@ -480,8 +560,11 @@ public class DataBaseRequest {
                 int id_tour = result.getInt("id_tour");
                 String team_home = result.getString("team_home");
                 String team_guest = result.getString("team_guest");
-                queryOutput += id_match + " " + id_tour + " " + team_home + " " + team_guest + "\n";
-                nextMatches.add(new NextMatches(id_match, id_tour, team_home, team_guest));
+                String m_date = result.getString("m_date");
+                String name_stadium = result.getString("name_stadium");
+                queryOutput += id_match + " " + id_tour + " " + team_home + " " + team_guest + 
+                        " " + m_date + " " + name_stadium + "\n";
+                nextMatches.add(new NextMatches(id_match, id_tour, team_home, team_guest, m_date, name_stadium));
             }
             System.out.println("Список матчей тура: \n" + queryOutput);
         } catch (SQLException ex) {

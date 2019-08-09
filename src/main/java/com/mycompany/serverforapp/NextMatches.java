@@ -29,11 +29,13 @@ public class NextMatches {
         this.nameStadium = nameStadium;
     }
 
-    public NextMatches(int idMatch, int idTour, String teamHome, String teamVisit) {
+    public NextMatches(int idMatch, int idTour, String teamHome, String teamVisit, String date, String nameStadium) {
         this.idMatch = idMatch;
         this.idTour = idTour;
         this.teamHome = teamHome;
         this.teamVisit = teamVisit;
+        this.date = date;
+        this.nameStadium = nameStadium;
     }
             
     public String getNameDivision() {
