@@ -147,12 +147,12 @@ public class DataBaseRequest {
 "from(    \n" +
 "select distinct id_stadium from dayofmatch\n" +
 "where id_tour = ?) t";
-    private String sqlNameStadiums = "select distinct name_stadium \n" +
+    private String sqlNameStadiums = "select distinct name_stadium, id_stadium \n" +
 "from v_dayofmatch\n" +
 "where id_tour = ?";
     private String sqlScheduleTime = "select match_date, match_time, id_stadium, \n" +
 "	   id_tour, name_stadium, id_match, \n" +
-"       team_home,team_guest \n" +
+"       team_home,team_guest, busy_time \n" +
 "from v_dayofmatch \n" +
 "where id_tour = ?;";
     //------Для подготовки запросов-------------
@@ -224,8 +224,9 @@ public class DataBaseRequest {
                 int id_match = resultSet.getInt(6);;
                 String team_home = resultSet.getString(7);
                 String team_guest = resultSet.getString(8);
+                int busy_time = resultSet.getInt(9);
                 list.add(new Schedule(match_date, match_time, id_stadium, id_tour, 
-                        name_stadium, id_match, team_home, team_guest));
+                        name_stadium, id_match, team_home, team_guest, busy_time));
             }
             
         } catch (SQLException ex) {
@@ -238,22 +239,25 @@ public class DataBaseRequest {
         return list;
     }
     
-    String getNameStadium(int id_tour) throws SQLException{
-        String stadiums = "";
+    ArrayList<Stadiums> getNameStadium(int id_tour) throws SQLException{
+        ArrayList<Stadiums> stadiums = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlNameStadiums);
             preparetStatement.setInt(1, id_tour);
             resultSet = preparetStatement.executeQuery();
             while(resultSet.next()){
-                stadiums +=" " + resultSet.getString(1);
+                String name = resultSet.getString(1);
+                int id = resultSet.getInt(2);
+                stadiums.add(new Stadiums(id, name));
             }
+            System.out.println("Stadium list from DB: \n" + stadiums.toString());
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
             resultSet.close();
             preparetStatement.close();
         }
-        return stadiums.trim();
+        return stadiums;
     }
     
     int getCntStadium(int id_tour) throws SQLException{

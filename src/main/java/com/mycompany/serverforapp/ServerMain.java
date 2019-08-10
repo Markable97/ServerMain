@@ -211,13 +211,28 @@ class ThreadClient implements Runnable {
                         String tour_JSON = gson.toJson(dbr.getNextMatches());
                         System.out.println("Message from db = " + tour_JSON);
                         out.writeUTF(tour_JSON);
-                        int cntStadiums = dbr.getCntStadium(id);
+                        break;
+                    case "getCntStadium":                       
+                        id = messageToJson.getId();
+                        tour = messageToJson.getTour();
+                        System.out.println("CSAE getCntStadium tour = " + tour);
+                        int cntStadiums = dbr.getCntStadium(tour);
                         System.out.println("Count stadiums = " + cntStadiums);
                         out.writeUTF(String.valueOf(cntStadiums));
-                        String stadiums = dbr.getNameStadium(id);
-                        System.out.println("Name stadiums = " + stadiums);
-                        out.writeUTF(stadiums);
-                        String schedule_JSON = gson.toJson(dbr.getSchedule(id));
+                        break;
+                    case "getStadiumList":
+                        id = messageToJson.getId();
+                        tour = messageToJson.getTour();
+                        System.out.println("CSAE getStadiumList tour = " + tour);
+                        String stadiums_JSON = gson.toJson(dbr.getNameStadium(tour));
+                        System.out.println("Name stadiums = " + stadiums_JSON);
+                        out.writeUTF(stadiums_JSON);
+                        break;
+                    case "getScheduleList":
+                        id = messageToJson.getId();
+                        tour = messageToJson.getTour();
+                        System.out.println("CSAE getScheduleList tour = " + tour);
+                        String schedule_JSON = gson.toJson(dbr.getSchedule(tour));
                         System.out.println("Message from db = " + schedule_JSON);
                         out.writeUTF(schedule_JSON);
                         break;
