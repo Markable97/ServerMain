@@ -71,6 +71,7 @@ class ThreadClient implements Runnable {
     int id;
     int tour;
     String id_team;
+    String date;
     MessageRegister user_info;
     
     ArrayList<TournamentTable> tournamentArray;//турнирная таблица в виде массива
@@ -212,27 +213,29 @@ class ThreadClient implements Runnable {
                         System.out.println("Message from db = " + tour_JSON);
                         out.writeUTF(tour_JSON);
                         break;
-                    case "getCntStadium":                       
+                    /*case "getCntStadium":                       
                         id = messageToJson.getId();
                         tour = messageToJson.getTour();
                         System.out.println("CSAE getCntStadium tour = " + tour);
                         int cntStadiums = dbr.getCntStadium(tour);
                         System.out.println("Count stadiums = " + cntStadiums);
                         out.writeUTF(String.valueOf(cntStadiums));
-                        break;
+                        break;*/
                     case "getStadiumList":
-                        id = messageToJson.getId();
-                        tour = messageToJson.getTour();
-                        System.out.println("CSAE getStadiumList tour = " + tour);
-                        String stadiums_JSON = gson.toJson(dbr.getNameStadium(tour));
+                        /*id = messageToJson.getId();
+                        tour = messageToJson.getTour();*/
+                        date = messageToJson.getDate();
+                        System.out.println("CSAE getStadiumList date = " + date);
+                        String stadiums_JSON = gson.toJson(dbr.getNameStadium(date));
                         System.out.println("Name stadiums = " + stadiums_JSON);
                         out.writeUTF(stadiums_JSON);
                         break;
                     case "getScheduleList":
-                        id = messageToJson.getId();
-                        tour = messageToJson.getTour();
-                        System.out.println("CSAE getScheduleList tour = " + tour);
-                        String schedule_JSON = gson.toJson(dbr.getSchedule(tour));
+                        /*id = messageToJson.getId();
+                        tour = messageToJson.getTour();*/
+                        date = messageToJson.getDate();
+                        System.out.println("CSAE getScheduleList date = " + date);
+                        String schedule_JSON = gson.toJson(dbr.getSchedule(date));
                         System.out.println("Message from db = " + schedule_JSON);
                         out.writeUTF(schedule_JSON);
                         break;

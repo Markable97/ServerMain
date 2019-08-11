@@ -146,15 +146,15 @@ public class DataBaseRequest {
     private String sqlCountStadiums = "select count(1) cnt_stadium\n" +
 "from(    \n" +
 "select distinct id_stadium from dayofmatch\n" +
-"where id_tour = ?) t";
+"where match_date = ?) t";
     private String sqlNameStadiums = "select distinct name_stadium, id_stadium \n" +
 "from v_dayofmatch\n" +
-"where id_tour = ?";
+"where match_date = ?";
     private String sqlScheduleTime = "select match_date, match_time, id_stadium, \n" +
 "	   id_tour, name_stadium, id_match, \n" +
 "       team_home,team_guest, busy_time \n" +
 "from v_dayofmatch \n" +
-"where id_tour = ?;";
+"where match_date = ?;";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -209,11 +209,11 @@ public class DataBaseRequest {
     public DataBaseRequest(String email, String password) throws SQLException{
         connection_login(email, password);
     }*/
-    ArrayList<Schedule> getSchedule(int idTour) throws SQLException{
+    ArrayList<Schedule> getSchedule(String date) throws SQLException{
         ArrayList<Schedule> list = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlScheduleTime);
-            preparetStatement.setInt(1, idTour);
+            preparetStatement.setString(1, date);
             resultSet = preparetStatement.executeQuery();
             while(resultSet.next()){
                 String match_date = resultSet.getString(1);
@@ -239,11 +239,11 @@ public class DataBaseRequest {
         return list;
     }
     
-    ArrayList<Stadiums> getNameStadium(int id_tour) throws SQLException{
+    ArrayList<Stadiums> getNameStadium(String date) throws SQLException{
         ArrayList<Stadiums> stadiums = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlNameStadiums);
-            preparetStatement.setInt(1, id_tour);
+            preparetStatement.setString(1, date);
             resultSet = preparetStatement.executeQuery();
             while(resultSet.next()){
                 String name = resultSet.getString(1);
@@ -260,10 +260,10 @@ public class DataBaseRequest {
         return stadiums;
     }
     
-    int getCntStadium(int id_tour) throws SQLException{
+    int getCntStadium(String date) throws SQLException{
         try {
             prCntStadiums = connect.prepareStatement(sqlCountStadiums);
-            prCntStadiums.setInt(1, id_tour);
+            prCntStadiums.setString(1, date);
             rsCntStadiums = prCntStadiums.executeQuery();
             int cnt = 0;
             while(rsCntStadiums.next()){

@@ -14,6 +14,7 @@ public class MessageToJson {
     String messageLogic;
     private int id;
     int tour;
+    String date;
     private String team_name;
     private MessageRegister user_info;
     String responseFromServer;
@@ -71,6 +72,10 @@ public class MessageToJson {
         return tour;
     }
 
+    public String getDate() {
+        return date;
+    }
+    
     @Override
     public String toString() {
         return "MessageToJson{" + "messageLogic=" + messageLogic + ", id_division=" + id + ", id_team=" + team_name + ", user_info=" + user_info + ", responseFromServer=" + responseFromServer + ", settingForApp=" + settingForApp + '}';
