@@ -151,7 +151,7 @@ public class DataBaseRequest {
 "from v_dayofmatch\n" +
 "where match_date = ?";
     private String sqlScheduleTime = "select match_date, match_time, id_stadium, \n" +
-"	   id_tour, name_stadium, id_match, \n" +
+"	   id_tour, name_stadium, id_match, name_division, \n" +
 "       team_home,team_guest, busy_time \n" +
 "from v_dayofmatch \n" +
 "where match_date = ?;";
@@ -222,11 +222,12 @@ public class DataBaseRequest {
                 int id_tour = resultSet.getInt(4);
                 String name_stadium = resultSet.getString(5);
                 int id_match = resultSet.getInt(6);;
-                String team_home = resultSet.getString(7);
-                String team_guest = resultSet.getString(8);
-                int busy_time = resultSet.getInt(9);
+                String name_division = resultSet.getString(7);
+                String team_home = resultSet.getString(8);
+                String team_guest = resultSet.getString(9);
+                int busy_time = resultSet.getInt(10);
                 list.add(new Schedule(match_date, match_time, id_stadium, id_tour, 
-                        name_stadium, id_match, team_home, team_guest, busy_time));
+                        name_stadium, id_match, name_division,team_home, team_guest, busy_time));
             }
             
         } catch (SQLException ex) {
