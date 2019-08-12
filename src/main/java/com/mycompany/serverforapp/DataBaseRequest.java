@@ -139,7 +139,7 @@ public class DataBaseRequest {
 "       id_type \n" +
 "       from users\n" +
 "       where email = ?;";
-    private String sqlGetTour = "select id_match, id_tour, team_home, team_guest, m_date, name_stadium\n" +
+    private String sqlGetTour = "select id_match, id_division, name_division, id_tour, team_home, team_guest, date_format(m_date, '%d %b. %H:%i') m_date, name_stadium\n" +
 "from v_matches \n" +
 "where id_season = 3 \n" +
 "and goal_home is null and goal_guest is null and id_tour = ? and id_division = ?";
@@ -562,14 +562,16 @@ public class DataBaseRequest {
         try {
             while(result.next()){
                 int id_match = result.getInt("id_match");
+                int id_division = result.getInt("id_division");
                 int id_tour = result.getInt("id_tour");
+                String name_division = result.getString("name_division");
                 String team_home = result.getString("team_home");
                 String team_guest = result.getString("team_guest");
                 String m_date = result.getString("m_date");
                 String name_stadium = result.getString("name_stadium");
-                queryOutput += id_match + " " + id_tour + " " + team_home + " " + team_guest + 
+                queryOutput += id_match + " "  + id_division + " "+ id_tour + " " + team_home + " " + team_guest + 
                         " " + m_date + " " + name_stadium + "\n";
-                nextMatches.add(new NextMatches(id_match, id_tour, team_home, team_guest, m_date, name_stadium));
+                nextMatches.add(new NextMatches(id_match, id_division, name_division, id_tour, team_home, team_guest, m_date, name_stadium));
             }
             System.out.println("Список матчей тура: \n" + queryOutput);
         } catch (SQLException ex) {

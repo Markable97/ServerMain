@@ -14,6 +14,7 @@ public class NextMatches {
     
     private String nameDivision;
     private int idMatch;
+    private int idDivision;
     private int idTour;
     private String teamHome;
     private String teamVisit;
@@ -29,8 +30,10 @@ public class NextMatches {
         this.nameStadium = nameStadium;
     }
 
-    public NextMatches(int idMatch, int idTour, String teamHome, String teamVisit, String date, String nameStadium) {
+    public NextMatches(int idMatch, int idDivision, String nameDivision, int idTour, String teamHome, String teamVisit, String date, String nameStadium) {
         this.idMatch = idMatch;
+        this.idDivision = idDivision;
+        this.nameDivision = nameDivision;
         this.idTour = idTour;
         this.teamHome = teamHome;
         this.teamVisit = teamVisit;

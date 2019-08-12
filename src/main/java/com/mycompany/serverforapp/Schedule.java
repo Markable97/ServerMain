@@ -16,6 +16,7 @@ public class Schedule {
     int id_tour;
     String name_stadium;
     int id_match;
+    int id_division;
     String name_division;
     String team_home;
     String team_guest;
