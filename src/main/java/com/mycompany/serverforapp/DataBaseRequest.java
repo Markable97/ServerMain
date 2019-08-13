@@ -139,7 +139,7 @@ public class DataBaseRequest {
 "       id_type \n" +
 "       from users\n" +
 "       where email = ?;";
-    private String sqlGetTour = "select id_match, id_division, name_division, id_tour, team_home, team_guest, date_format(m_date, '%d %b. %H:%i') m_date, name_stadium\n" +
+    private String sqlGetTour = "select id_match, id_division, name_division, id_tour, team_home, team_guest, date_format(m_date, '%Y-%m-%d %H:%i') m_date, name_stadium\n" +
 "from v_matches \n" +
 "where id_season = 3 \n" +
 "and goal_home is null and goal_guest is null and id_tour = ? and id_division = ?";
