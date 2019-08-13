@@ -90,7 +90,7 @@ class ThreadClient implements Runnable {
     public ThreadClient(Socket client, int numberUser, DataBaseRequest dbr) throws IOException{
         this.fromclient = client;
         this.dbr = dbr;
-        this.dbr.openConnection();
+        //this.dbr.openConnection();
         System.out.println(client.getInetAddress() + " connection number = " + numberUser);
         in = new DataInputStream(fromclient.getInputStream());
         out = new DataOutputStream(fromclient.getOutputStream());
@@ -254,7 +254,7 @@ class ThreadClient implements Runnable {
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            dbr.closeConnection();
+            //dbr.closeConnection();
             try {
                 System.out.println("Disconnect client, close channels....");
                 in.close();
