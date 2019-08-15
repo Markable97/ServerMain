@@ -155,6 +155,13 @@ public class DataBaseRequest {
 "       team_home,team_guest, busy_time \n" +
 "from v_dayofmatch \n" +
 "where match_date = ?;";
+    private String sqlInsertSchedule = " update dayofmatch "
+            + " set id_tour = ?, "
+                + " id_match = ?,"
+                + " busy_time = ? "
+            + " where match_time = ? "
+            + " and match_date = ? "
+            + " and id_stadium = ?;";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -186,29 +193,35 @@ public class DataBaseRequest {
     private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
-    
-    /*public DataBaseRequest(String name_team, String message, int id_match)throws SQLException{
-        squadInfo.clear();
-        prevMatches.clear();
-        switch (message) {
-            case "team":
-                connection(name_team);
-                break;
-            case "player":
-                connection_playerInMatch(id_match);
-                break;
-            default:
-                connection_allMatches(name_team);
-                break;
+    public void setSchedule(ArrayList<Schedule> schedule) throws SQLException{
+        int cnt = 0;
+        try {
+            preparetStatement = connect.prepareStatement(sqlInsertSchedule);
+            for(Schedule s : schedule){
+                preparetStatement.setInt(1, s.getId_tour());
+                preparetStatement.setInt(2, s.getId_match());
+                preparetStatement.setInt(3, s.getBusy_time());
+                preparetStatement.setString(4, s.getMatch_time());
+                preparetStatement.setString(5, s.getMatch_date());
+                preparetStatement.setInt(6, s.getId_stadium());
+                preparetStatement.executeUpdate();
+                System.out.println("Расписание добавдено: " + s.toString());
+                cnt++;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            System.out.println("Все матчей добавлено: " + cnt);
+            preparetStatement.close();
         }
-    }*/
-    /*public DataBaseRequest(UsersLogin user_info, String name, String email) throws SQLException{
-        connection_register(user_info, name, email);
+        if(cnt == schedule.size()){
+            message = "SUCCESS";
+        }else{
+            message = "bad";
+        }
+        
     }
     
-    public DataBaseRequest(String email, String password) throws SQLException{
-        connection_login(email, password);
-    }*/
     ArrayList<Schedule> getSchedule(String date) throws SQLException{
         ArrayList<Schedule> list = new ArrayList<>();
         try {

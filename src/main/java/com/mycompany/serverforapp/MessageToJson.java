@@ -1,5 +1,7 @@
 package com.mycompany.serverforapp;
 
+import java.util.ArrayList;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -19,6 +21,7 @@ public class MessageToJson {
     private MessageRegister user_info;
     String responseFromServer;
     int settingForApp; 
+    ArrayList<Schedule> schedule;
     
     
 
@@ -75,12 +78,19 @@ public class MessageToJson {
     public String getDate() {
         return date;
     }
-    
-    @Override
-    public String toString() {
-        return "MessageToJson{" + "messageLogic=" + messageLogic + ", id_division=" + id + ", id_team=" + team_name + ", user_info=" + user_info + ", responseFromServer=" + responseFromServer + ", settingForApp=" + settingForApp + '}';
+
+    public ArrayList<Schedule> getSchedule() {
+        return schedule;
     }
 
+    @Override
+    public String toString() {
+        return "MessageToJson{" + "messageLogic=" + messageLogic + ", id=" + id + ", tour=" + tour + 
+                ", date=" + date + ", team_name=" + team_name + ", user_info=" + user_info + 
+                ", responseFromServer=" + responseFromServer + ", settingForApp=" + settingForApp + 
+                ", schedule=" + schedule + '}' + "\n";
+    }
+    
+    
 
-        
 }

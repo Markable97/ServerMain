@@ -36,6 +36,35 @@ public class Schedule {
         this.busy_time = busy_time;
     }
 
+    public int getId_stadium() {
+        return id_stadium;
+    }
+
+    public int getId_tour() {
+        return id_tour;
+    }
+
+    public int getId_match() {
+        return id_match;
+    }
+
+    public int getId_division() {
+        return id_division;
+    }
+
+    public int getBusy_time() {
+        return busy_time;
+    }
+
+    public String getMatch_date() {
+        return match_date;
+    }
+
+    public String getMatch_time() {
+        return match_time;
+    }
+
+    
     @Override
     public String toString() {
         return "Schedule{" + "match_date=" + match_date + ", match_time=" + match_time + 

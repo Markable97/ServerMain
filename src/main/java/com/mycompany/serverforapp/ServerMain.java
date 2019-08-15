@@ -106,7 +106,7 @@ class ThreadClient implements Runnable {
                 input = in.readUTF();
                 //System.out.println("new branch locig server");
                
-                System.out.println("String received from the client = " + input);
+                System.out.println("String received from the client = \n" + input);
                 messageToJson = gson.fromJson(input, MessageToJson.class);
                 System.out.println(messageToJson.toString());
                 
@@ -238,6 +238,13 @@ class ThreadClient implements Runnable {
                         String schedule_JSON = gson.toJson(dbr.getSchedule(date));
                         System.out.println("Message from db = " + schedule_JSON);
                         out.writeUTF(schedule_JSON);
+                        break;
+                    case "setSchedule":
+                        System.out.println("CASE Schedule");
+                        ArrayList<Schedule> list = messageToJson.getSchedule();
+                        System.out.println("Schedule from client: \n" + list.toString());
+                        dbr.setSchedule(list);
+                        out.writeUTF(dbr.message);
                         break;
                 }//case 
             }//while 
