@@ -276,7 +276,7 @@ class ThreadClient implements Runnable {
     
     void sentFile(ArrayList<TournamentTable> list) throws IOException{
         System.out.println("Добавляю потоки для файлов");                        
-        String pathBig = "D:\\Учеба\\Диплом\\Логотипы команд\\BigImage\\"; 
+        String pathBig = "D:\\Pictures\\"; 
         int cnt_photo = 0; //кол-во существующих фоток
         for(int i = 0; i < list.size(); i++){                            
             File imageBig = new File(pathBig + list.get(i).getUrlImage());                            
@@ -310,7 +310,7 @@ class ThreadClient implements Runnable {
     }
     
     void sentFileAllMatches(ArrayList<PrevMatches> list,String teamName) throws IOException{
-        String teamPath = "D:\\Учеба\\Диплом\\Логотипы команд\\BigImage\\";
+        String teamPath = "D:\\Pictures\\"; 
         ArrayList<String> listImage = new ArrayList<>();
         File imageStart = new File(teamPath + teamName + ".png");
         if(imageStart.exists()){

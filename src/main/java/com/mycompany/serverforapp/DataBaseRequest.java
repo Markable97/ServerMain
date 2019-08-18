@@ -15,7 +15,7 @@ public class DataBaseRequest {
     
     String user = "root";
     String password = "7913194";
-    String url = "jdbc:mysql://localhost:3306/football_main";
+    String url = "jdbc:mysql://localhost:3306/football_main_work";
     
     public static DataBaseRequest db;
     private int settingForApp;
@@ -56,7 +56,7 @@ public class DataBaseRequest {
 "       sc_con, \n" +
 "       points, \n" +
 "       logo \n" +
-"       FROM football_main.v_tournament_table\n" +
+"       FROM v_tournament_table\n" +
 "       where id_division = ?;";
     private  String sqlPrevMatches = "SELECT id_match, name_division, \n" +
 "	id_division, \n" +
@@ -70,9 +70,9 @@ public class DataBaseRequest {
 "       staff_name,\n" +
 "       logo_home,\n" +
 "       logo_guest\n" +
-"       FROM football_main.v_matches \n" +
+"       FROM v_matches \n" +
 "       where (to_days(curdate()) - to_days(m_date) ) >= 0 and (to_days(curdate()) - to_days(m_date)) < 8\n" +
-"       and id_division = ?;";
+"       and id_division = ? and goal_home is not null;";
     private String sqlNextMatches = "SELECT name_division, \n" +
 "       id_tour, \n" +
 "       team_home, \n" +
@@ -80,8 +80,9 @@ public class DataBaseRequest {
 "       date_format(m_date,'%d-%m-%y %H:%i') as m_date, \n" +
 "       name_stadium, \n" +
 "       staff_name\n" +
-"       FROM football_main.v_matches m\n" +
-"       where curdate() < m_date and id_division = ?;";
+"       FROM v_matches m\n" +
+"       where curdate() < m_date and id_division = ?"
+            + " order by m_date;";
     private  String sqlSquadInfo = "select team_name, \n" +
 "	name, \n" +
 "       name_amplua,\n" +
@@ -108,7 +109,7 @@ public class DataBaseRequest {
 "       staff_name,\n" +
 "       logo_home,\n" +
 "       logo_guest\n" +
-"       FROM football_main.v_matches m\n" +
+"       FROM v_matches m\n" +
 "       where team_home = ? or team_guest = ?\n" +
 "       order by id_tour desc;";
     private  String sqlPlayersInMatch = "select pm.id_player, pm.name,\n" +
@@ -141,7 +142,7 @@ public class DataBaseRequest {
 "       where email = ?;";
     private String sqlGetTour = "select id_match, id_division, name_division, id_tour, team_home, team_guest, date_format(m_date, '%Y-%m-%d %H:%i') m_date, name_stadium\n" +
 "from v_matches \n" +
-"where id_season = 3 \n" +
+"where id_season = 4 \n" +
 "and goal_home is null and goal_guest is null and id_tour = ? and id_division = ?";
     private String sqlCountStadiums = "select count(1) cnt_stadium\n" +
 "from(    \n" +
