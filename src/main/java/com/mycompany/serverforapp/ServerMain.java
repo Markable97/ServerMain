@@ -112,7 +112,7 @@ class ThreadClient implements Runnable {
                 
                 messageLogic = messageToJson.getMessageLogic();
                 
-                
+                String forClientJSON; 
                 switch(messageLogic){
                     case "close":
                         System.out.println("Client closes the connection");
@@ -153,10 +153,10 @@ class ThreadClient implements Runnable {
                         dbr.connection_squad_info(id_team);
                         //DataBaseRequest baseRequest1 = new DataBaseRequest(id_team,messageLogic, 0);
                         playersArray = dbr.getSquadInfo();
-                        String playersToJson = gson.toJson(playersArray);
+                        forClientJSON = gson.toJson(playersArray);
                         System.out.println("[4]Array of object from DB to JSON");
-                        System.out.println(playersToJson);
-                        out.writeUTF(playersToJson);
+                        System.out.println(forClientJSON);
+                        out.writeUTF(forClientJSON);
                         sentFilePlayer(playersArray);
                         break;
                     case "player":
@@ -164,24 +164,23 @@ class ThreadClient implements Runnable {
                         id = messageToJson.getId();
                         dbr.connection_playerInMatch(id);
                         playersArray = dbr.getSquadInfo();
-                        String playerInMatchToJson = gson.toJson(playersArray);
+                        forClientJSON = gson.toJson(playersArray);
                         System.out.println("[6]Array of object from DB to JSON");
-                        System.out.println(playerInMatchToJson);
-                        out.writeUTF(playerInMatchToJson);
+                        System.out.println(forClientJSON);
+                        out.writeUTF(forClientJSON);
                         break;
                     case "matches":
                         System.out.println("Case matches for team " + messageToJson.getTeam_name());
                         String teamName = messageToJson.getTeam_name();
                         dbr.connection_allMatches(teamName);
                         prevMatchesArray = dbr.getPrevMatches();
-                        String prevAllMatchesForTeamToJson = gson.toJson(prevMatchesArray);
+                        forClientJSON = gson.toJson(prevMatchesArray);
                         System.out.println("[5]Array of object from DB to JSON");
-                        System.out.println(prevAllMatchesForTeamToJson);
-                        out.writeUTF(prevAllMatchesForTeamToJson);
+                        System.out.println(forClientJSON);
+                        out.writeUTF(forClientJSON);
                         System.out.println("Поток для фоток");
                         sentFileAllMatches(prevMatchesArray, teamName);
-                        //out.write(listImage.size());
-                        
+                        //out.write(listImage.size()); 
                         break;
                     case "register":
                         System.out.println("CASE register");
@@ -191,17 +190,17 @@ class ThreadClient implements Runnable {
                         System.out.println("Encoded password = " + regist.getEncodePassword());
                         dbr.connection_register(regist,user_info.name, user_info.email);
                         System.out.println("Message from db = " + dbr.getMessage());
-                        String responseRegister = gson.toJson(new MessageToJson(dbr.getMessage()));
-                        out.writeUTF(responseRegister);
+                        forClientJSON = gson.toJson(new MessageToJson(dbr.getMessage()));
+                        out.writeUTF(forClientJSON);
                         break;
                     case "login":
                         System.out.println("CASE login");
                         user_info = messageToJson.getUser_info();
                         System.out.println(user_info);
                         dbr.connection_login(user_info.email, user_info.password);
-                        String response = gson.toJson(new MessageToJson(dbr.getMessage(),dbr.getSettingForApp()));
+                        forClientJSON = gson.toJson(new MessageToJson(dbr.getMessage(),dbr.getSettingForApp()));
                         System.out.println("Message from db = " + dbr.getMessage());
-                        out.writeUTF(response);
+                        out.writeUTF(forClientJSON);
                         break;
                     case "getTour":
                         System.out.println("CASE getTour");
@@ -209,9 +208,19 @@ class ThreadClient implements Runnable {
                         tour = messageToJson.getTour();
                         System.out.println("CASE getTour id = " + id + " tour = " + tour);
                         dbr.connection_getTour(id, tour);
-                        String tour_JSON = gson.toJson(dbr.getNextMatches());
-                        System.out.println("Message from db = " + tour_JSON);
-                        out.writeUTF(tour_JSON);
+                        forClientJSON = gson.toJson(dbr.getNextMatches());
+                        System.out.println("Message from db = " + forClientJSON);
+                        out.writeUTF(forClientJSON);
+                        break;
+                    case "getTourAddResult":
+                        System.out.println("CASE getTourAddResult");
+                        id = messageToJson.getId();
+                        date = messageToJson.getDate();
+                        System.out.println("CASE getTour id = " + id + " date = " + date);
+                        dbr.connection_getTourAddResults(id, date);
+                        forClientJSON = gson.toJson(dbr.getNextMatches());
+                        System.out.println("Message from db = " + forClientJSON);
+                        out.writeUTF(forClientJSON);
                         break;
                     /*case "getCntStadium":                       
                         id = messageToJson.getId();

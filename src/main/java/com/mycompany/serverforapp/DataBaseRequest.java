@@ -163,6 +163,13 @@ public class DataBaseRequest {
             + " where match_time = ? "
             + " and match_date = ? "
             + " and id_stadium = ?;";
+    private String sqlGetTourForAddResult = ""
+            + " select id_match, id_division, name_division, id_tour, team_home, team_guest, "
+            + " date_format(m_date, '%Y-%m-%d %H:%i') m_date, name_stadium "
+            + " from v_matches "
+            + " where id_season = 4 "
+            + " and id_division = ? "
+            + " and m_date between ? and ?";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -414,6 +421,24 @@ public class DataBaseRequest {
         }finally{
             rsGetTour.close();
             prGetTour.close();
+        }
+    }
+    
+    void connection_getTourAddResults(int id_division, String m_date) throws SQLException{
+        String date1 = m_date + " 00:00";
+        String date2 = m_date + " 23:59";
+        try{
+            preparetStatement = connect.prepareStatement(sqlGetTourForAddResult);
+            preparetStatement.setInt(1, id_division);
+            preparetStatement.setString(2, date1);
+            preparetStatement.setString(3, date2);
+            resultSet = preparetStatement.executeQuery();
+            getTour(resultSet);
+        }catch(SQLException ex){
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            resultSet.close();
+            preparetStatement.close();
         }
     }
     
