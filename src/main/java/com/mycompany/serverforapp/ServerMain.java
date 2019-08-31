@@ -235,18 +235,18 @@ class ThreadClient implements Runnable {
                         tour = messageToJson.getTour();*/
                         date = messageToJson.getDate();
                         System.out.println("CSAE getStadiumList date = " + date);
-                        String stadiums_JSON = gson.toJson(dbr.getNameStadium(date));
-                        System.out.println("Name stadiums = " + stadiums_JSON);
-                        out.writeUTF(stadiums_JSON);
+                        forClientJSON = gson.toJson(dbr.getNameStadium(date));
+                        System.out.println("Name stadiums = " + forClientJSON);
+                        out.writeUTF(forClientJSON);
                         break;
                     case "getScheduleList":
                         /*id = messageToJson.getId();
                         tour = messageToJson.getTour();*/
                         date = messageToJson.getDate();
                         System.out.println("CSAE getScheduleList date = " + date);
-                        String schedule_JSON = gson.toJson(dbr.getSchedule(date));
-                        System.out.println("Message from db = " + schedule_JSON);
-                        out.writeUTF(schedule_JSON);
+                        forClientJSON = gson.toJson(dbr.getSchedule(date));
+                        System.out.println("Message from db = " + forClientJSON);
+                        out.writeUTF(forClientJSON);
                         break;
                     case "setSchedule":
                         System.out.println("CASE Schedule");
@@ -255,6 +255,19 @@ class ThreadClient implements Runnable {
                         dbr.setSchedule(list);
                         out.writeUTF(dbr.message);
                         break;
+                    case "getPlayersProtocol":
+                        System.out.println("CASE getPlayersProtocol");
+                        id_team = messageToJson.getTeam_name();
+                        System.out.println("New id_team = " + id_team);
+                        String[] teams = id_team.split(";");
+                        dbr.connectiom_playersProtocol(teams[0]);
+                        forClientJSON = gson.toJson(dbr.getSquadInfo());
+                        System.out.println("Players protocol JSON: \n" + forClientJSON);
+                        out.writeUTF(forClientJSON);
+                        dbr.connectiom_playersProtocol(teams[1]);
+                        forClientJSON = gson.toJson(dbr.getSquadInfo());
+                        System.out.println("Players protocol JSON: \n" + forClientJSON);
+                        out.writeUTF(forClientJSON);
                 }//case 
             }//while 
            

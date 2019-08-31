@@ -170,6 +170,10 @@ public class DataBaseRequest {
             + " where id_season = 4 "
             + " and id_division = ? "
             + " and m_date between ? and ?";
+    private String sqlGetProtocolTeam = ""
+            + " select team_name, name"
+            + " from v_squad "
+            + " where team_name = ?";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -405,6 +409,25 @@ public class DataBaseRequest {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
             rsPlayerInMatch.close();
+        }
+    }
+    
+    void connectiom_playersProtocol(String teamName){
+         String queryOutput = "";
+        try {
+            preparetStatement = connect.prepareStatement(sqlGetProtocolTeam);
+            preparetStatement.setString(1, teamName);
+            resultSet = preparetStatement.executeQuery();
+            squadInfo.clear();
+            while(resultSet.next()){
+                String team = resultSet.getString(1);
+                String name = resultSet.getString(2);
+                queryOutput += team + " " + team + " "; 
+                squadInfo.add(new Player(team, name));
+            }
+            System.out.println("From DB " + squadInfo.toString());
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

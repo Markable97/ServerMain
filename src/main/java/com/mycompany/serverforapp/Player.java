@@ -60,7 +60,11 @@ public class Player {
         this.own_goal = own_goal;
     }
 
-    
+    public Player(String playerTeam, String playerName) {
+        this.playerTeam = playerTeam;
+        this.playerName = playerName;
+    }
+
     
     @Override
     public String toString() {
