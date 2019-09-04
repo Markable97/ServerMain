@@ -51,8 +51,11 @@ public class PrevMatches {
     public String toString() {
         return "PrevMatches{" + "id_match=" + id_match + ", nameDivision=" + nameDivision + ", idTour=" + idTour + ", teamHome=" + teamHome + ", goalHome=" + goalHome + ", goalVisit=" + goalVisit + ", teamVisit=" + teamVisit + '}';
     }
+
+    public int getId_match() {
+        return id_match;
+    }
     
-   
     public String getNameDivision() {
         return nameDivision;
     }

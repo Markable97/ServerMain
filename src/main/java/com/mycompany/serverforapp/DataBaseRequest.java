@@ -174,6 +174,19 @@ public class DataBaseRequest {
             + " select id_player, team_name, name"
             + " from v_squad "
             + " where team_name = ?";
+    private String sqlSetResultMatch = " "
+            + " update matches "
+            + " set goal_home = ?, "
+            + " goal_guest = ? "
+            + " where id_match = ?";
+    private String sqlInsertPlayerInMatch = ""
+            + " insert into players_in_match "
+            + " set id_match = ?, "
+            + " id_player = ?, "
+            + " goal = ?, "
+            + " assist = ?, "
+            + " yellow_card = ?, "
+            + " red_card = ?";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -205,6 +218,54 @@ public class DataBaseRequest {
     private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
+    public String setResults(PrevMatches match, ArrayList<Player> players){
+        boolean f1, f2 = false;
+        try {
+            preparetStatement = connect.prepareStatement(sqlSetResultMatch);
+            preparetStatement.setInt(1, match.getGoalHome());
+            preparetStatement.setInt(2, match.getGoalVisit());
+            preparetStatement.setInt(3, match.getId_match());
+            preparetStatement.executeUpdate();
+            f1 = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+            f1 = false;
+        } finally{
+            try {
+                preparetStatement.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        try {
+            preparetStatement = connect.prepareStatement(sqlInsertPlayerInMatch);
+            for(Player p : players){
+                preparetStatement.setInt(1, match.getId_match());
+                preparetStatement.setInt(2, p.getIdPlayer());
+                preparetStatement.setInt(3, p.getGoal());
+                preparetStatement.setInt(4, p.getAssist());
+                preparetStatement.setInt(5, p.getYellowCard());
+                preparetStatement.setInt(6, p.getRedCard());
+                preparetStatement.execute();
+            }
+            f2 = true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+            f2 = false;
+        }finally{
+            try {
+                preparetStatement.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        if(f1 && f2){
+            return "SUCCES";
+        }else{
+            return "bad";
+        }
+    }
+    
     public void setSchedule(ArrayList<Schedule> schedule) throws SQLException{
         int cnt = 0;
         try {
