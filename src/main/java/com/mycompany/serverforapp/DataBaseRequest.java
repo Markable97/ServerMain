@@ -171,7 +171,7 @@ public class DataBaseRequest {
             + " and id_division = ? "
             + " and m_date between ? and ?";
     private String sqlGetProtocolTeam = ""
-            + " select team_name, name"
+            + " select id_player, team_name, name"
             + " from v_squad "
             + " where team_name = ?";
     //------Для подготовки запросов-------------
@@ -420,10 +420,11 @@ public class DataBaseRequest {
             resultSet = preparetStatement.executeQuery();
             squadInfo.clear();
             while(resultSet.next()){
-                String team = resultSet.getString(1);
-                String name = resultSet.getString(2);
-                queryOutput += team + " " + team + " "; 
-                squadInfo.add(new Player(team, name));
+                int idPlayer = resultSet.getInt(1);
+                String team = resultSet.getString(2);
+                String name = resultSet.getString(3);
+                queryOutput += idPlayer + " " + team + " " + team + " "; 
+                squadInfo.add(new Player(idPlayer, team, name));
             }
             System.out.println("From DB " + squadInfo.toString());
         } catch (SQLException ex) {

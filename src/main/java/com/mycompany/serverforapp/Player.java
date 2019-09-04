@@ -60,7 +60,8 @@ public class Player {
         this.own_goal = own_goal;
     }
 
-    public Player(String playerTeam, String playerName) {
+    public Player(int idPlayer, String playerTeam, String playerName) {
+        this.idPlayer = idPlayer;
         this.playerTeam = playerTeam;
         this.playerName = playerName;
     }

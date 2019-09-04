@@ -43,13 +43,16 @@ public class PrevMatches {
         this.urlImageGuest = urlImageG;
     }
 
-    @Override
-    public String toString() {
-        return "PrevMatches{" + "nameDivision=" + nameDivision + ", idTour=" + idTour + ", teamHome=" + teamHome + 
-                ", goalHome=" + goalHome + ", goalVisit=" + goalVisit + ", teamVisit=" + teamVisit + "}\n";
+    public PrevMatches(){
+        
     }
 
-
+    @Override
+    public String toString() {
+        return "PrevMatches{" + "id_match=" + id_match + ", nameDivision=" + nameDivision + ", idTour=" + idTour + ", teamHome=" + teamHome + ", goalHome=" + goalHome + ", goalVisit=" + goalVisit + ", teamVisit=" + teamVisit + '}';
+    }
+    
+   
     public String getNameDivision() {
         return nameDivision;
     }

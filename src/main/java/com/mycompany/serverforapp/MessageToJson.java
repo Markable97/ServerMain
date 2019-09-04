@@ -22,7 +22,8 @@ public class MessageToJson {
     String responseFromServer;
     int settingForApp; 
     ArrayList<Schedule> schedule;
-    
+    PrevMatches match;
+    ArrayList<Player> players;
     
 
     public MessageToJson(String messageLogic, int id_division, String id_team, MessageRegister user_info) {
@@ -83,6 +84,16 @@ public class MessageToJson {
         return schedule;
     }
 
+    public PrevMatches getMatch() {
+        return match;
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
+    
+    
+    
     @Override
     public String toString() {
         return "MessageToJson{" + "messageLogic=" + messageLogic + ", id=" + id + ", tour=" + tour + 
