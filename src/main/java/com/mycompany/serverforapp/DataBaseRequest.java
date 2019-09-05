@@ -238,6 +238,7 @@ public class DataBaseRequest {
             }
         }
         try {
+            connect.setAutoCommit(false);
             preparetStatement = connect.prepareStatement(sqlInsertPlayerInMatch);
             for(Player p : players){
                 preparetStatement.setInt(1, match.getId_match());
@@ -249,9 +250,19 @@ public class DataBaseRequest {
                 preparetStatement.execute();
             }
             f2 = true;
+            try {
+                connect.commit();
+            } catch (SQLException ex) {
+                Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
             f2 = false;
+            try {
+                connect.rollback();
+            } catch (SQLException ex1) {
+                Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex1);
+            }
         }finally{
             try {
                 preparetStatement.close();
@@ -268,6 +279,7 @@ public class DataBaseRequest {
     
     public void setSchedule(ArrayList<Schedule> schedule) throws SQLException{
         int cnt = 0;
+        connect.setAutoCommit(false);
         try {
             preparetStatement = connect.prepareStatement(sqlInsertSchedule);
             for(Schedule s : schedule){
@@ -281,7 +293,9 @@ public class DataBaseRequest {
                 System.out.println("Расписание добавдено: " + s.toString());
                 cnt++;
             }
-        } catch (SQLException ex) {
+             connect.commit();        
+        } catch (SQLException ex) {          
+             connect.rollback();
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
             System.out.println("Все матчей добавлено: " + cnt);
