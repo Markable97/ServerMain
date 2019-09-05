@@ -275,6 +275,7 @@ class ThreadClient implements Runnable {
                         ArrayList<Player> players = messageToJson.getPlayers();
                         System.out.println("Information from client: \n" + match + "\n"+ players);
                         forClientJSON = dbr.setResults(match, players);
+                        System.out.println("Response from DB - " + forClientJSON);
                         out.writeUTF(forClientJSON);
                         break;
                 }//case 

@@ -183,10 +183,10 @@ public class DataBaseRequest {
             + " insert into players_in_match "
             + " set id_match = ?, "
             + " id_player = ?, "
-            + " goal = ?, "
-            + " assist = ?, "
-            + " yellow_card = ?, "
-            + " red_card = ?";
+            + " count_goals = ?, "
+            + " count_assist = ?, "
+            + " yellow = ?, "
+            + " red = ?";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -260,9 +260,9 @@ public class DataBaseRequest {
             }
         }
         if(f1 && f2){
-            return "SUCCES";
+            return "SUCCESS";
         }else{
-            return "bad";
+            return "bad DB";
         }
     }
     
