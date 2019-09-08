@@ -20,6 +20,7 @@ public class NextMatches {
     private String teamVisit;
     private String date;
     private String nameStadium;
+    String goal;
 
     public NextMatches(String nameDivision, int idTour, String teamHome, String teamVisit, String date, String nameStadium) {
         this.nameDivision = nameDivision;
@@ -40,7 +41,20 @@ public class NextMatches {
         this.date = date;
         this.nameStadium = nameStadium;
     }
-            
+
+    public NextMatches(int idMatch, int idDivision, String nameDivision, int idTour, String teamHome, 
+            String teamVisit, String date, String nameStadium, String goal) {
+        this.idMatch = idMatch;
+        this.idDivision = idDivision;
+        this.nameDivision = nameDivision;
+        this.idTour = idTour;
+        this.teamHome = teamHome;
+        this.teamVisit = teamVisit;
+        this.date = date;
+        this.nameStadium = nameStadium;
+        this.goal = goal;
+    }
+    
     public String getNameDivision() {
         return nameDivision;
     }

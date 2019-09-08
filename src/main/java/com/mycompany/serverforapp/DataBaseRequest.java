@@ -165,7 +165,7 @@ public class DataBaseRequest {
             + " and id_stadium = ?;";
     private String sqlGetTourForAddResult = ""
             + " select id_match, id_division, name_division, id_tour, team_home, team_guest, "
-            + " date_format(m_date, '%Y-%m-%d %H:%i') m_date, name_stadium "
+            + " date_format(m_date, '%Y-%m-%d %H:%i') m_date, name_stadium, goal_home "
             + " from v_matches "
             + " where id_season = 4 "
             + " and id_division = ? "
@@ -513,7 +513,7 @@ public class DataBaseRequest {
             prGetTour.setInt(1, id_tour);
             prGetTour.setInt(2, id_division);
             rsGetTour = prGetTour.executeQuery();
-            getTour(rsGetTour);
+            getTour(rsGetTour, 0);
             
         }catch (SQLException ex){
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
@@ -532,7 +532,7 @@ public class DataBaseRequest {
             preparetStatement.setString(2, date1);
             preparetStatement.setString(3, date2);
             resultSet = preparetStatement.executeQuery();
-            getTour(resultSet);
+            getTour(resultSet, 1);
         }catch(SQLException ex){
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
@@ -694,7 +694,7 @@ public class DataBaseRequest {
         }
     }
     
-    private void getTour(ResultSet result){
+    private void getTour(ResultSet result, int option){
         String queryOutput = "";
         nextMatches.clear();
         try {
@@ -707,9 +707,16 @@ public class DataBaseRequest {
                 String team_guest = result.getString("team_guest");
                 String m_date = result.getString("m_date");
                 String name_stadium = result.getString("name_stadium");
-                queryOutput += id_match + " "  + id_division + " "+ id_tour + " " + team_home + " " + team_guest + 
-                        " " + m_date + " " + name_stadium + "\n";
-                nextMatches.add(new NextMatches(id_match, id_division, name_division, id_tour, team_home, team_guest, m_date, name_stadium));
+                if(option == 1){ //если 0 то добавляем еще один параметр
+                 String goal = result.getString("goal_home");   
+                 queryOutput += id_match + " "  + id_division + " "+ id_tour + " " + team_home + " " + team_guest + 
+                        " " + m_date + " " + name_stadium + " " + goal + "\n";
+                    nextMatches.add(new NextMatches(id_match, id_division, name_division, id_tour, team_home, team_guest, m_date, name_stadium, goal));
+                }else{
+                    queryOutput += id_match + " "  + id_division + " "+ id_tour + " " + team_home + " " + team_guest + 
+                        " " + m_date + " " + name_stadium /*+ " " + goal*/ + "\n";
+                    nextMatches.add(new NextMatches(id_match, id_division, name_division, id_tour, team_home, team_guest, m_date, name_stadium));
+                }
             }
             System.out.println("Список матчей тура: \n" + queryOutput);
         } catch (SQLException ex) {
