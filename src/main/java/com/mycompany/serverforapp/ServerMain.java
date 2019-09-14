@@ -47,7 +47,7 @@ public class ServerMain {
             while(!server.isClosed()){
                 System.out.println("Waiting for a response from the client");
                 Socket fromclient = server.accept();
-                executeIt.execute(new ThreadClient(fromclient, number, dbr));
+                executeIt.submit(new ThreadClient(fromclient, number, dbr));
                 number++; 
                 //executeIt.shutdown();
             }
@@ -273,8 +273,14 @@ class ThreadClient implements Runnable {
                         System.out.println("CASE setResults");
                         PrevMatches match = messageToJson.getMatch();
                         ArrayList<Player> players = messageToJson.getPlayers();
-                        System.out.println("Information from client: \n" + match + "\n"+ players);
-                        forClientJSON = dbr.setResults(match, players);
+                        int actionDb = messageToJson.getActionDB();
+                        System.out.println("Information from client: \n" + match + "\n"+ players 
+                                + "\nActionDB = " + actionDb);
+                        if(actionDb == 1){
+                            forClientJSON = dbr.setResults(match, players);
+                        }else{
+                            forClientJSON = dbr.updateResults(match, players);
+                        }
                         System.out.println("Response from DB - " + forClientJSON);
                         out.writeUTF(forClientJSON);
                         break;

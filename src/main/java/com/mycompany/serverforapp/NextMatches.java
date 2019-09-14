@@ -10,7 +10,7 @@ package com.mycompany.serverforapp;
  *
  * @author Markable
  */
-public class NextMatches {
+public class NextMatches extends NextMatchesWithGoal{
     
     private String nameDivision;
     private int idMatch;
@@ -20,9 +20,10 @@ public class NextMatches {
     private String teamVisit;
     private String date;
     private String nameStadium;
-    String goal;
+    
 
     public NextMatches(String nameDivision, int idTour, String teamHome, String teamVisit, String date, String nameStadium) {
+        super();
         this.nameDivision = nameDivision;
         this.idTour = idTour;
         this.teamHome = teamHome;
@@ -32,6 +33,7 @@ public class NextMatches {
     }
 
     public NextMatches(int idMatch, int idDivision, String nameDivision, int idTour, String teamHome, String teamVisit, String date, String nameStadium) {
+        super();
         this.idMatch = idMatch;
         this.idDivision = idDivision;
         this.nameDivision = nameDivision;
@@ -42,8 +44,10 @@ public class NextMatches {
         this.nameStadium = nameStadium;
     }
 
-    public NextMatches(int idMatch, int idDivision, String nameDivision, int idTour, String teamHome, 
-            String teamVisit, String date, String nameStadium, String goal) {
+    public NextMatches(int idMatch, int idDivision, String nameDivision, int idTour, 
+            String teamHome, String teamVisit, String date, String nameStadium,
+            int played, int goalHome, int goalGuest) {
+        super(played, goalHome, goalGuest);
         this.idMatch = idMatch;
         this.idDivision = idDivision;
         this.nameDivision = nameDivision;
@@ -52,7 +56,6 @@ public class NextMatches {
         this.teamVisit = teamVisit;
         this.date = date;
         this.nameStadium = nameStadium;
-        this.goal = goal;
     }
     
     public String getNameDivision() {

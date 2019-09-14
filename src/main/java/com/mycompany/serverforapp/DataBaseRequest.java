@@ -165,7 +165,7 @@ public class DataBaseRequest {
             + " and id_stadium = ?;";
     private String sqlGetTourForAddResult = ""
             + " select id_match, id_division, name_division, id_tour, team_home, team_guest, "
-            + " date_format(m_date, '%Y-%m-%d %H:%i') m_date, name_stadium, goal_home "
+            + " date_format(m_date, '%Y-%m-%d %H:%i') m_date, name_stadium, played, goal_home, goal_guest "
             + " from v_matches "
             + " where id_season = 4 "
             + " and id_division = ? "
@@ -177,7 +177,8 @@ public class DataBaseRequest {
     private String sqlSetResultMatch = " "
             + " update matches "
             + " set goal_home = ?, "
-            + " goal_guest = ? "
+            + " goal_guest = ?, "
+            + " played = 1 "
             + " where id_match = ?";
     private String sqlInsertPlayerInMatch = ""
             + " insert into players_in_match "
@@ -218,6 +219,10 @@ public class DataBaseRequest {
     private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
+    public String updateResults(PrevMatches match, ArrayList<Player> players){
+        return null;
+    }
+    
     public String setResults(PrevMatches match, ArrayList<Player> players){
         boolean f1, f2 = false;
         try {
@@ -707,11 +712,14 @@ public class DataBaseRequest {
                 String team_guest = result.getString("team_guest");
                 String m_date = result.getString("m_date");
                 String name_stadium = result.getString("name_stadium");
-                if(option == 1){ //если 0 то добавляем еще один параметр
-                 String goal = result.getString("goal_home");   
+                if(option == 1){ //если 1 то добавляем еще один параметр
+                 int played = result.getInt("played");   
+                 int goal_home = result.getInt("goal_home");
+                 int goal_guest = result.getInt("goal_guest");
                  queryOutput += id_match + " "  + id_division + " "+ id_tour + " " + team_home + " " + team_guest + 
-                        " " + m_date + " " + name_stadium + " " + goal + "\n";
-                    nextMatches.add(new NextMatches(id_match, id_division, name_division, id_tour, team_home, team_guest, m_date, name_stadium, goal));
+                        " " + m_date + " " + name_stadium + " " + played + "\n";
+                    nextMatches.add(new NextMatches(id_match, id_division, name_division, id_tour,
+                            team_home, team_guest, m_date, name_stadium, played, goal_home, goal_guest));
                 }else{
                     queryOutput += id_match + " "  + id_division + " "+ id_tour + " " + team_home + " " + team_guest + 
                         " " + m_date + " " + name_stadium /*+ " " + goal*/ + "\n";

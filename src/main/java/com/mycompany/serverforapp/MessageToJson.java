@@ -24,6 +24,7 @@ public class MessageToJson {
     ArrayList<Schedule> schedule;
     PrevMatches match;
     ArrayList<Player> players;
+    int actionDB;
     
 
     public MessageToJson(String messageLogic, int id_division, String id_team, MessageRegister user_info) {
@@ -91,7 +92,10 @@ public class MessageToJson {
     public ArrayList<Player> getPlayers() {
         return players;
     }
-    
+
+    public int getActionDB() {
+        return actionDB;
+    }
     
     
     @Override

@@ -1,2 +1,3 @@
 com\mycompany\serverforapp\Schedule.class
 com\mycompany\serverforapp\Stadiums.class
+com\mycompany\serverforapp\NextMatchesWithGoal.class
