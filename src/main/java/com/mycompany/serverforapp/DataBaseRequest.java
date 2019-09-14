@@ -170,10 +170,17 @@ public class DataBaseRequest {
             + " where id_season = 4 "
             + " and id_division = ? "
             + " and m_date between ? and ?";
-    private String sqlGetProtocolTeam = ""
-            + " select id_player, team_name, name"
-            + " from v_squad "
-            + " where team_name = ?";
+    private String sqlGetProtocolTeam = "" + 
+            "select s.id_player, s.name, s.id_team, s.team_name, tmp.id_match, tmp.in_game,"
+            + " tmp.count_goals, tmp.count_assist, tmp.yellow, tmp.red " +
+            "from\n" +
+            "(\n" +
+            "select m.id_match, m.in_game, s.id_player, m.count_goals, m.count_assist, m.yellow, m.red, m.penalty, m.penalty_out, m.own_goal \n" +
+            "from v_squad s\n" +
+            "join players_in_match m on s.id_player = m.id_player\n" +
+            "where id_match = ?) tmp\n" +
+            "right join v_squad s on tmp.id_player = s.id_player\n" +
+            "where s.team_name = ?";
     private String sqlSetResultMatch = " "
             + " update matches "
             + " set goal_home = ?, "
@@ -492,19 +499,25 @@ public class DataBaseRequest {
         }
     }
     
-    void connectiom_playersProtocol(String teamName){
+    void connectiom_playersProtocol(String teamName, int idMatch){
          String queryOutput = "";
         try {
             preparetStatement = connect.prepareStatement(sqlGetProtocolTeam);
-            preparetStatement.setString(1, teamName);
+            preparetStatement.setInt(1, idMatch);
+            preparetStatement.setString(2, teamName);
             resultSet = preparetStatement.executeQuery();
             squadInfo.clear();
             while(resultSet.next()){
-                int idPlayer = resultSet.getInt(1);
-                String team = resultSet.getString(2);
-                String name = resultSet.getString(3);
+                int idPlayer = resultSet.getInt("id_player");
+                String team = resultSet.getString("team_name");
+                String name = resultSet.getString("name");
+                int inGame = resultSet.getInt("in_game");
+                int goal = resultSet.getInt("count_goals");
+                int assist = resultSet.getInt("count_assist");
+                int yellow = resultSet.getInt("yellow");
+                int red = resultSet.getInt("red");
                 queryOutput += idPlayer + " " + team + " " + team + " "; 
-                squadInfo.add(new Player(idPlayer, team, name));
+                squadInfo.add(new Player(idPlayer, team, name, inGame, goal, assist, yellow, red));
             }
             System.out.println("From DB " + squadInfo.toString());
         } catch (SQLException ex) {

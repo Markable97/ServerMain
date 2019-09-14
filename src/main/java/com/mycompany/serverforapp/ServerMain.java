@@ -258,13 +258,14 @@ class ThreadClient implements Runnable {
                     case "getPlayersProtocol":
                         System.out.println("CASE getPlayersProtocol");
                         id_team = messageToJson.getTeam_name();
-                        System.out.println("New id_team = " + id_team);
+                        int id_match = messageToJson.getId();
+                        System.out.println("New id_team = " + id_team + " id+match = " + id_match);
                         String[] teams = id_team.split(";");
-                        dbr.connectiom_playersProtocol(teams[0]);
+                        dbr.connectiom_playersProtocol(teams[0], id_match);
                         forClientJSON = gson.toJson(dbr.getSquadInfo());
                         System.out.println("Players protocol JSON: \n" + forClientJSON);
                         out.writeUTF(forClientJSON);
-                        dbr.connectiom_playersProtocol(teams[1]);
+                        dbr.connectiom_playersProtocol(teams[1], id_match);
                         forClientJSON = gson.toJson(dbr.getSquadInfo());
                         System.out.println("Players protocol JSON: \n" + forClientJSON);
                         out.writeUTF(forClientJSON);
