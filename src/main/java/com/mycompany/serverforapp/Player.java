@@ -77,14 +77,18 @@ public class Player {
         this.yellowCard = yellow;
         this.redCard = red;
     }
-    
+
     @Override
     public String toString() {
-        return "Player{" + "idPlayer=" + idPlayer + ", playerTeam=" + playerTeam + ", playerName=" + 
-                playerName + ", birhtday=" + birhtday + ", amplua=" + amplua + ", number=" + number + 
-                ", games=" + games + " inGame = " + inGame +", goal=" + goal + ", assist=" + assist + ", yellowCard=" + 
-                yellowCard + ", redCard=" + redCard + ", playerUrlImage=" + playerUrlImage + "}\n";
+        return "Player{\n" + "idPlayer=" + idPlayer + ", playerTeam=" + playerTeam 
+                + ", playerName=" + playerName + ", birhtday=" + birhtday + ", amplua=" + amplua 
+                + ", number=" + number + ", games=" + games + ", goal=" + goal 
+                + ", penalty=" + penalty + ", assist=" + assist + ", yellowCard=" + yellowCard 
+                + ", redCard=" + redCard + ", penalty_out=" + penalty_out + ", own_goal=" + own_goal 
+                + ", inGame=" + inGame + ", playerUrlImage=" + playerUrlImage + '}'+"\n";
     }
+    
+   
 
     
     public int getIdPlayer() {
@@ -140,4 +144,37 @@ public class Player {
     public int getPenalty() {
         return penalty;
     }
+
+    public int getPenalty_out() {
+        return penalty_out;
+    }
+
+    public int getOwn_goal() {
+        return own_goal;
+    }
+
+    public int getInGame() {
+        return inGame;
+    }
+
+    
+    
+    public void setPenalty(int penalty) {
+        this.penalty = penalty;
+    }
+
+    public void setYellowCard(int yellowCard) {
+        this.yellowCard = yellowCard;
+    }
+
+    public void setPenalty_out(int penalty_out) {
+        this.penalty_out = penalty_out;
+    }
+
+    public void setOwn_goal(int own_goal) {
+        this.own_goal = own_goal;
+    }
+    
+    
+    
 }

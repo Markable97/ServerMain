@@ -172,7 +172,8 @@ public class DataBaseRequest {
             + " and m_date between ? and ?";
     private String sqlGetProtocolTeam = "" + 
             "select s.id_player, s.name, s.id_team, s.team_name, tmp.id_match, tmp.in_game,"
-            + " tmp.count_goals, tmp.count_assist, tmp.yellow, tmp.red " +
+            + " tmp.count_goals, tmp.count_assist, tmp.yellow, tmp.red, tmp.penalty, "
+            + "tmp.penalty_out, tmp.own_goal " +
             "from\n" +
             "(\n" +
             "select m.id_match, m.in_game, s.id_player, m.count_goals, m.count_assist, m.yellow, m.red, m.penalty, m.penalty_out, m.own_goal \n" +
@@ -180,7 +181,8 @@ public class DataBaseRequest {
             "join players_in_match m on s.id_player = m.id_player\n" +
             "where id_match = ?) tmp\n" +
             "right join v_squad s on tmp.id_player = s.id_player\n" +
-            "where s.team_name = ?";
+            "where s.team_name = ? "
+            + " order by name";
     private String sqlSetResultMatch = " "
             + " update matches "
             + " set goal_home = ?, "
@@ -194,7 +196,19 @@ public class DataBaseRequest {
             + " count_goals = ?, "
             + " count_assist = ?, "
             + " yellow = ?, "
-            + " red = ?";
+            + " red = ?, "
+            + " penalty = ?, "
+            + " penalty_out = ?, "
+            + " own_goal = ?,"
+            + " in_game = 1";
+    private String sqlDeletePlayerInMatch = ""
+            + " delete from players_in_match "
+            + " where id_match = ?;";
+    private String sqlUpdateResultMatch = " "
+            + " update matches "
+            + " set goal_home = ?, "
+            + " goal_guest = ? "
+            + " where id_match = ?;";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -226,13 +240,66 @@ public class DataBaseRequest {
     private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
-    public String updateResults(PrevMatches match, ArrayList<Player> players){
-        return null;
+    public String updateResults(PrevMatches match, ArrayList<Player> players)throws SQLException {
+        boolean f = false;
+        try {
+            connect.setAutoCommit(false);
+            preparetStatement = connect.prepareStatement(sqlUpdateResultMatch);
+            preparetStatement = connect.prepareStatement(sqlSetResultMatch);
+            preparetStatement.setInt(1, match.getGoalHome());
+            preparetStatement.setInt(2, match.getGoalVisit());
+            preparetStatement.setInt(3, match.getId_match());
+            preparetStatement.executeUpdate();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally{
+            try {
+                preparetStatement.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        //Удаление предыдущих игроков
+        preparetStatement = connect.prepareStatement(sqlDeletePlayerInMatch);
+        preparetStatement.setInt(1, match.getId_match());
+        preparetStatement.executeUpdate();
+        preparetStatement.close();
+        //добавление новых
+        try{
+            preparetStatement = connect.prepareStatement(sqlInsertPlayerInMatch);
+            for(Player p : players){
+                preparetStatement.setInt(1, match.getId_match());
+                preparetStatement.setInt(2, p.getIdPlayer());
+                preparetStatement.setInt(3, p.getGoal());
+                preparetStatement.setInt(4, p.getAssist());
+                preparetStatement.setInt(5, p.getYellowCard());
+                preparetStatement.setInt(6, p.getRedCard());
+                preparetStatement.setInt(7, p.getPenalty());
+                preparetStatement.setInt(8, p.getPenalty_out());
+                preparetStatement.setInt(9, p.getOwn_goal());
+                preparetStatement.execute();
+            }
+            connect.commit();
+            f = true;
+        }catch (SQLException ex){
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            preparetStatement.close();
+        }
+
+        if(f){
+            return "SUCCESS";
+        }else{
+            return "bad DB";
+        }
     }
     
     public String setResults(PrevMatches match, ArrayList<Player> players){
         boolean f1, f2 = false;
         try {
+            connect.setAutoCommit(false);
             preparetStatement = connect.prepareStatement(sqlSetResultMatch);
             preparetStatement.setInt(1, match.getGoalHome());
             preparetStatement.setInt(2, match.getGoalVisit());
@@ -250,7 +317,6 @@ public class DataBaseRequest {
             }
         }
         try {
-            connect.setAutoCommit(false);
             preparetStatement = connect.prepareStatement(sqlInsertPlayerInMatch);
             for(Player p : players){
                 preparetStatement.setInt(1, match.getId_match());
@@ -259,6 +325,9 @@ public class DataBaseRequest {
                 preparetStatement.setInt(4, p.getAssist());
                 preparetStatement.setInt(5, p.getYellowCard());
                 preparetStatement.setInt(6, p.getRedCard());
+                preparetStatement.setInt(7, p.getPenalty());
+                preparetStatement.setInt(8, p.getPenalty_out());
+                preparetStatement.setInt(9, p.getOwn_goal());
                 preparetStatement.execute();
             }
             f2 = true;
@@ -516,8 +585,15 @@ public class DataBaseRequest {
                 int assist = resultSet.getInt("count_assist");
                 int yellow = resultSet.getInt("yellow");
                 int red = resultSet.getInt("red");
+                int penalty = resultSet.getInt("penalty");
+                int penaltyOut = resultSet.getInt("penalty_out");
+                int ownGoal = resultSet.getInt("own_goal");
                 queryOutput += idPlayer + " " + team + " " + team + " "; 
-                squadInfo.add(new Player(idPlayer, team, name, inGame, goal, assist, yellow, red));
+                Player player = new Player(idPlayer, team, name, inGame, goal, assist, yellow, red);
+                player.setPenalty(penalty);
+                player.setPenalty_out(penaltyOut);
+                player.setOwn_goal(ownGoal);
+                squadInfo.add(player);
             }
             System.out.println("From DB " + squadInfo.toString());
         } catch (SQLException ex) {
