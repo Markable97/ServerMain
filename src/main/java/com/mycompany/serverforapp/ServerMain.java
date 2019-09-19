@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -40,7 +41,7 @@ public class ServerMain {
       // Scanner scanner = new Scanner(System.in);
        //String serverComand;
        System.out.println("Enabling the server");
-       ServerSocket server = new ServerSocket(55555);
+        ServerSocket server = new ServerSocket(55555);
        int number = 0;
        DataBaseRequest dbr = DataBaseRequest.getInstance();
         try {
@@ -89,6 +90,7 @@ class ThreadClient implements Runnable {
     
     public ThreadClient(Socket client, int numberUser, DataBaseRequest dbr) throws IOException{
         this.fromclient = client;
+        this.fromclient.setSoTimeout(15000); //Держит соединение 30 секунд, затем бросает исключение
         this.dbr = dbr;
         //this.dbr.openConnection();
         System.out.println(client.getInetAddress() + " connection number = " + numberUser);
@@ -296,7 +298,7 @@ class ThreadClient implements Runnable {
             //fromclient.close();
         } catch (IOException ex) {
             System.out.println("User turn off: " + ex.getLocalizedMessage());
-            
+  
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
