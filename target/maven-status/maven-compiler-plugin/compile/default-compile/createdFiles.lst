@@ -1,3 +1,14 @@
 com\mycompany\serverforapp\Schedule.class
+com\mycompany\serverforapp\PrevMatches.class
 com\mycompany\serverforapp\Stadiums.class
+com\mycompany\serverforapp\ThreadClient.class
+com\mycompany\serverforapp\TournamentTable.class
+com\mycompany\serverforapp\ServerMain.class
+com\mycompany\serverforapp\PrevAllMatchesForTeam.class
 com\mycompany\serverforapp\NextMatchesWithGoal.class
+com\mycompany\serverforapp\NextMatches.class
+com\mycompany\serverforapp\MessageRegister.class
+com\mycompany\serverforapp\MessageToJson.class
+com\mycompany\serverforapp\Player.class
+com\mycompany\serverforapp\UsersLogin.class
+com\mycompany\serverforapp\DataBaseRequest.class
