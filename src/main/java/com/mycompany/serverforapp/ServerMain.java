@@ -3,17 +3,21 @@ package com.mycompany.serverforapp;
 
 import com.google.gson.Gson;
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -86,6 +90,8 @@ class ThreadClient implements Runnable {
     DataBaseRequest dbr;
     MessageToJson messageToJson;
     
+    String ip;
+    BufferedWriter output_log;
     Gson gson = new Gson();
     
     public ThreadClient(Socket client, int numberUser, DataBaseRequest dbr) throws IOException{
@@ -93,6 +99,20 @@ class ThreadClient implements Runnable {
         this.fromclient.setSoTimeout(15000); //Держит соединение 30 секунд, затем бросает исключение
         this.dbr = dbr;
         //this.dbr.openConnection();
+        ip = client.getInetAddress().toString();
+        try
+        {
+           //String path = "C:\\Users\\march\\Desktop\\"; //WIndows
+           String path = "/home/mark/Shares/Log";
+           Calendar dateNow = Calendar.getInstance();
+           SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+           this.output_log = new BufferedWriter( new FileWriter(path+ip+".txt", true)); 
+           this.output_log.newLine();
+           this.output_log.write("\n" + ip + " : connect in " + formatForDateNow.format(dateNow.getTime()) );
+           this.output_log.newLine();
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }
         System.out.println(client.getInetAddress() + " connection number = " + numberUser);
         in = new DataInputStream(fromclient.getInputStream());
         out = new DataOutputStream(fromclient.getOutputStream());
@@ -110,6 +130,7 @@ class ThreadClient implements Runnable {
                
                 System.out.println("String received from the client = \n" + input);
                 messageToJson = gson.fromJson(input, MessageToJson.class);
+                this.output_log.write(messageToJson.toString());
                 System.out.println(messageToJson.toString());
                 
                 messageLogic = messageToJson.getMessageLogic();
@@ -298,13 +319,22 @@ class ThreadClient implements Runnable {
             //fromclient.close();
         } catch (IOException ex) {
             System.out.println("User turn off: " + ex.getLocalizedMessage());
+            try {
+                this.output_log.write("User turn off: " + ex.getLocalizedMessage());
+                this.output_log.newLine();
+            } catch (IOException ex1) {
+                Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex1);
+            }
   
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
             //dbr.closeConnection();
             try {
+                this.output_log.write("Disconnect client, close channels....");
+                this.output_log.flush();
                 System.out.println("Disconnect client, close channels....");
+                output_log.close();
                 in.close();
                 out.close();
                 fromclient.close();

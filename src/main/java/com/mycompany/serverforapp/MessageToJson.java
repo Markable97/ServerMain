@@ -100,10 +100,10 @@ public class MessageToJson {
     
     @Override
     public String toString() {
-        return "MessageToJson{" + "messageLogic=" + messageLogic + ", id=" + id + ", tour=" + tour + 
-                ", date=" + date + ", team_name=" + team_name + ", user_info=" + user_info + 
-                ", responseFromServer=" + responseFromServer + ", settingForApp=" + settingForApp + 
-                ", schedule=" + schedule + '}' + "\n";
+        return "MessageToJson{\n" + "messageLogic=" + messageLogic + ", \nid=" + id + ", \ntour=" + tour + 
+                ", \ndate=" + date + ", \nteam_name=" + team_name + ", \nuser_info=" + user_info + 
+                ", \nresponseFromServer=" + responseFromServer + ", \nsettingForApp=" + settingForApp + 
+                ", \nschedule=" + schedule + '}' + "\n";
     }
     
     
