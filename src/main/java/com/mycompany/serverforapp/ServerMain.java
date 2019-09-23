@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class ServerMain {
     
-    static ExecutorService executeIt = Executors.newFixedThreadPool(1);
+    static ExecutorService executeIt = Executors.newFixedThreadPool(10);
    
     /**
      * @param args the command line arguments
@@ -347,7 +347,8 @@ class ThreadClient implements Runnable {
     
     void sentFile(ArrayList<TournamentTable> list) throws IOException{
         System.out.println("Добавляю потоки для файлов");                        
-        String pathBig = "D:\\Pictures\\"; 
+        //String pathBig = "D:\\Pictures\\"; 
+        String pathBig = "/home/mark/Shares/Pictures/";
         int cnt_photo = 0; //кол-во существующих фоток
         for(int i = 0; i < list.size(); i++){                            
             File imageBig = new File(pathBig + list.get(i).getUrlImage());                            
@@ -381,7 +382,8 @@ class ThreadClient implements Runnable {
     }
     
     void sentFileAllMatches(ArrayList<PrevMatches> list,String teamName) throws IOException{
-        String teamPath = "D:\\Pictures\\"; 
+        //String teamPath = "D:\\Pictures\\"; 
+        String teamPath = "/home/mark/Shares/Pictures/"; 
         ArrayList<String> listImage = new ArrayList<>();
         File imageStart = new File(teamPath + teamName + ".png");
         if(imageStart.exists()){
