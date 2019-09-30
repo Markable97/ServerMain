@@ -4,6 +4,7 @@ package com.mycompany.serverforapp;
 import com.google.gson.Gson;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -45,7 +46,7 @@ public class ServerMain {
       // Scanner scanner = new Scanner(System.in);
        //String serverComand;
        System.out.println("Enabling the server");
-        ServerSocket server = new ServerSocket(55555);
+       ServerSocket server = new ServerSocket(55555);
        int number = 0;
        DataBaseRequest dbr = DataBaseRequest.getInstance();
         try {
@@ -91,7 +92,7 @@ class ThreadClient implements Runnable {
     MessageToJson messageToJson;
     
     String ip;
-    BufferedWriter output_log;
+    //BufferedWriter output_log;
     Gson gson = new Gson();
     
     public ThreadClient(Socket client, int numberUser, DataBaseRequest dbr) throws IOException{
@@ -100,7 +101,7 @@ class ThreadClient implements Runnable {
         this.dbr = dbr;
         //this.dbr.openConnection();
         ip = client.getInetAddress().toString();
-        try
+        /*try
         {
            //String path = "C:\\Users\\march\\Desktop\\"; //WIndows
            String path = "/home/mark/Shares/Log";
@@ -112,7 +113,7 @@ class ThreadClient implements Runnable {
            this.output_log.newLine();
         }catch(IOException e){
             System.out.println(e.getMessage());
-        }
+        }*/
         System.out.println(client.getInetAddress() + " connection number = " + numberUser);
         in = new DataInputStream(fromclient.getInputStream());
         out = new DataOutputStream(fromclient.getOutputStream());
@@ -125,12 +126,27 @@ class ThreadClient implements Runnable {
             exit:
             while(fromclient.isConnected()){
                 System.out.println("Wait message..."); 
+                byte[] data = null;
+                int length = -1;
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                //in = new DataInputStream(fromclient.getInputStream());
+                while (true) {
+                    if ((length = in.available()) > 0) {
+                        data = new byte[length];
+                        in.readFully(data, 0, length);
+                        outputStream.write(data, 0, length);
+                    }else{
+                        break;
+                    }
+                }   
+                 System.out.println(outputStream.toString());
+                 input = outputStream.toString();
                 input = in.readUTF();
                 //System.out.println("new branch locig server");
                
-                System.out.println("String received from the client = \n" + input);
+                //System.out.println("String received from the client = \n" + input);
                 messageToJson = gson.fromJson(input, MessageToJson.class);
-                this.output_log.write(messageToJson.toString());
+                //this.output_log.write(messageToJson.toString());
                 System.out.println(messageToJson.toString());
                 
                 messageLogic = messageToJson.getMessageLogic();
@@ -319,22 +335,22 @@ class ThreadClient implements Runnable {
             //fromclient.close();
         } catch (IOException ex) {
             System.out.println("User turn off: " + ex.getLocalizedMessage());
-            try {
+            /*try {
                 this.output_log.write("User turn off: " + ex.getLocalizedMessage());
                 this.output_log.newLine();
             } catch (IOException ex1) {
                 Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex1);
-            }
+            }*/
   
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
             //dbr.closeConnection();
             try {
-                this.output_log.write("Disconnect client, close channels....");
-                this.output_log.flush();
+                //this.output_log.write("Disconnect client, close channels....");
+                //this.output_log.flush();
                 System.out.println("Disconnect client, close channels....");
-                output_log.close();
+                //output_log.close();
                 in.close();
                 out.close();
                 fromclient.close();
