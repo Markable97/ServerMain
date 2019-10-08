@@ -1,8 +1,14 @@
 package com.mycompany.serverforapp;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -499,7 +505,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_main_activity(int id_div) throws SQLException{
+    void connection_main_activity(int id_div) throws SQLException, IOException{
         try {
             tournamentTable.clear();
             prevMatches.clear();
@@ -636,7 +642,7 @@ public class DataBaseRequest {
         }
     }
     
-    private  void getTournamentTable(ResultSet result){
+    private  void getTournamentTable(ResultSet result) throws IOException{
         tournamentTable.clear();
         String queryOutput = "";
         try {
@@ -652,11 +658,14 @@ public class DataBaseRequest {
                 int sc_con = result.getInt("sc_con");
                 int points = result.getInt("points");
                 String logo = result.getString("logo");
+                String imageBase64 = getBase64Image(logo);
                 queryOutput += nameDivision + " " + teamName + " " + games  + " " + wins + " "  + draws + " "
                         + losses + " " + goals_scored + " " + goals_conceded + " "
                         + sc_con + " " + points + " " + logo + "\n";
-                tournamentTable.add(new TournamentTable(nameDivision, teamName, games,  points, wins, draws, losses, 
-                        goals_scored, goals_conceded/*, sc_con*/,  logo));
+                TournamentTable table = new TournamentTable(nameDivision, teamName, games,  points, wins, draws, losses, 
+                        goals_scored, goals_conceded/*, sc_con*/,  logo);
+                table.setImageBase64(imageBase64);
+                tournamentTable.add(table);
             }
             System.out.println("DataBaseRequest getTournamentTable(): output query from DB: \n" + queryOutput);
         } catch (SQLException ex) {
@@ -664,7 +673,7 @@ public class DataBaseRequest {
         }
     }
 
-    private  void getPrevMatches(ResultSet result){
+    private  void getPrevMatches(ResultSet result) throws IOException{
         String queryOutput = "";
         prevMatches.clear();
         try {
@@ -680,9 +689,13 @@ public class DataBaseRequest {
                 String stadium = result.getString("name_stadium");
                 String logoHome = result.getString("logo_home");
                 String logoGuest = result.getString("logo_guest");
+                String logoHomeBase64 = getBase64Image(logoHome);
+                String logoGuestBase64 = getBase64Image(logoGuest);
                 queryOutput +=id_match + " " + nameDivision + " " + tour + " " + teamHome + " " + goalHome + " " +
                         goalGuest + " " + teamGuest + " " + mDate + " " + stadium + " " + logoHome + " " + logoGuest + "\n";
-                prevMatches.add(new PrevMatches(id_match, nameDivision, tour, teamHome, goalHome, goalGuest, teamGuest, logoHome, logoGuest));
+                PrevMatches matches = new PrevMatches(id_match, nameDivision, tour, teamHome, goalHome, goalGuest, teamGuest, logoHome, logoGuest);
+                matches.setImages(logoHomeBase64, logoGuestBase64);
+                prevMatches.add(matches);
             }
             System.out.println("DataBaseRequest getPrevMatches(): output query  from DB:" + queryOutput);
         } catch (SQLException ex) {
@@ -876,5 +889,24 @@ public class DataBaseRequest {
         return settingForApp;
     }
 
-    
+    String getBase64Image(String logo) throws FileNotFoundException, IOException{
+        String pathBig = "D:\\Pictures\\"; 
+        //String pathBig = "/home/mark/Shares/Pictures/";
+        File image = new File(pathBig + logo); 
+        if(image.exists()){
+            System.out.println("Файлы существует " + image.getName());
+                    //String nameImage = tournamentArray.get(i).getUrlImage().replace(".png",""); 
+                    //out.writeUTF(nameImage);
+                    byte[] byteArrayBig = new byte[(int)image.length()];
+                    BufferedInputStream streamBig = new BufferedInputStream(new FileInputStream(image));
+                    streamBig.read(byteArrayBig, 0, byteArrayBig.length);
+                    streamBig.close();
+                    //out.writeInt(byteArrayBig.length);
+                    return Base64.getEncoder().encodeToString(byteArrayBig);
+        }else{
+            System.out.println("Файл "+logo+" не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            return "";
+        }
+        
+    }
 }

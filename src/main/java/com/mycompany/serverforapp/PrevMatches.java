@@ -19,6 +19,8 @@ public class PrevMatches {
      int goalHome;
      int goalVisit;
      String teamVisit;
+     String imageHome;
+     String imageGuest;
      transient String urlImageHome;
      transient String urlImageGuest;
 
@@ -49,7 +51,8 @@ public class PrevMatches {
 
     @Override
     public String toString() {
-        return "PrevMatches{" + "id_match=" + id_match + ", nameDivision=" + nameDivision + ", idTour=" + idTour + ", teamHome=" + teamHome + ", goalHome=" + goalHome + ", goalVisit=" + goalVisit + ", teamVisit=" + teamVisit + '}';
+        return "PrevMatches{" + "id_match=" + id_match + ", nameDivision=" + nameDivision + ", idTour=" + idTour + ", teamHome=" + teamHome + ", goalHome=" + goalHome
+                + ", goalVisit=" + goalVisit + ", teamVisit=" + teamVisit + '}'+"\n"+imageHome+"\n";
     }
 
     public int getId_match() {
@@ -86,5 +89,10 @@ public class PrevMatches {
 
     String getUrlImageGuest() {
         return urlImageGuest;
+    }
+
+    public void setImages(String imageHome, String imageGuest) {
+        this.imageHome = imageHome;
+        this.imageGuest = imageGuest;
     }
 }

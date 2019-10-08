@@ -161,7 +161,7 @@ class ThreadClient implements Runnable {
                         id = messageToJson.getId();
                         dbr.connection_main_activity(id);
                         tournamentArray = dbr.getTournamentTable();
-                        sentFile(tournamentArray);
+                        //sentFile(tournamentArray);
                         String tournamentTableToJson = gson.toJson(tournamentArray);
                         
                         //prevMatchesArray = baseQuery.getResultsPrevMatches();
@@ -183,9 +183,9 @@ class ThreadClient implements Runnable {
                         
                 
                         System.out.println("[1]Array of object from DB to JSON");
-                        System.out.println(tournamentTableToJson);
+                        System.out.println(tournamentArray.toString());
                         System.out.println("[2]Array of object from DB to JSON");
-                        System.out.println(prevMatchesToJson);
+                        System.out.println(prevMatchesArray.toString());
                         System.out.println("[3]Array of object from DB to JSON");
                         System.out.println(nextMatchesToJson);
                         System.out.println("New branch");
