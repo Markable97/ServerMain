@@ -141,7 +141,7 @@ class ThreadClient implements Runnable {
                 }   
                  System.out.println(outputStream.toString());
                  input = outputStream.toString();
-                input = in.readUTF();
+                //input = in.readUTF();
                 //System.out.println("new branch locig server");
                
                 //System.out.println("String received from the client = \n" + input);
@@ -150,7 +150,7 @@ class ThreadClient implements Runnable {
                 System.out.println(messageToJson.toString());
                 
                 messageLogic = messageToJson.getMessageLogic();
-                
+                byte forClientByte[];
                 String forClientJSON; 
                 switch(messageLogic){
                     case "close":
@@ -161,15 +161,26 @@ class ThreadClient implements Runnable {
                         id = messageToJson.getId();
                         dbr.connection_main_activity(id);
                         tournamentArray = dbr.getTournamentTable();
+                        sentFile(tournamentArray);
                         String tournamentTableToJson = gson.toJson(tournamentArray);
-                
+                        
                         //prevMatchesArray = baseQuery.getResultsPrevMatches();
                         prevMatchesArray = dbr.getPrevMatches();
-                        String prevMatchesToJson = gson.toJson(prevMatchesArray);
-                
+                        String prevMatchesToJson = "";
+                        if (!prevMatchesArray.isEmpty()){
+                            prevMatchesToJson = gson.toJson(prevMatchesArray);
+                        }else{
+                            prevMatchesToJson = "prevMatch";
+                        }
                         //nextMatchesArray = baseQuery.getCalendar();
                         nextMatchesArray = dbr.getNextMatches();
-                        String nextMatchesToJson = gson.toJson(nextMatchesArray);
+                        String nextMatchesToJson = "";
+                        if (!nextMatchesArray.isEmpty()){
+                            nextMatchesToJson = gson.toJson(nextMatchesArray);
+                        }else{
+                            nextMatchesToJson = "nextMatch";
+                        }
+                        
                 
                         System.out.println("[1]Array of object from DB to JSON");
                         System.out.println(tournamentTableToJson);
@@ -178,13 +189,19 @@ class ThreadClient implements Runnable {
                         System.out.println("[3]Array of object from DB to JSON");
                         System.out.println(nextMatchesToJson);
                         System.out.println("New branch");
-                        out.writeUTF(tournamentTableToJson);
-                        out.writeUTF(prevMatchesToJson);
-                        out.writeUTF(nextMatchesToJson);
+                        forClientByte = (tournamentTableToJson+"?"+prevMatchesToJson+
+                                "?"+nextMatchesToJson).getBytes();
+                        System.out.println("Size first = " + forClientByte.length);
+                        out.write(forClientByte);
+                        out.flush();
+                        //out.writeUTF(tournamentTableToJson);
+                        //out.writeUTF(prevMatchesToJson);
+                        //out.writeUTF(nextMatchesToJson);
                         //отправка на клиент
-                        sentFile(tournamentArray);
+                        
 
                         break;
+
                     case "team":
                         System.out.println("Case team");
                         id_team = messageToJson.getTeam_name();
@@ -230,7 +247,9 @@ class ThreadClient implements Runnable {
                         dbr.connection_register(regist,user_info.name, user_info.email);
                         System.out.println("Message from db = " + dbr.getMessage());
                         forClientJSON = gson.toJson(new MessageToJson(dbr.getMessage()));
-                        out.writeUTF(forClientJSON);
+                        //out.writeUTF(forClientJSON);
+                        forClientByte = forClientJSON.getBytes();
+                        out.write(forClientByte);
                         break;
                     case "login":
                         System.out.println("CASE login");
@@ -239,7 +258,10 @@ class ThreadClient implements Runnable {
                         dbr.connection_login(user_info.email, user_info.password);
                         forClientJSON = gson.toJson(new MessageToJson(dbr.getMessage(),dbr.getSettingForApp()));
                         System.out.println("Message from db = " + dbr.getMessage());
-                        out.writeUTF(forClientJSON);
+                        forClientByte = forClientJSON.getBytes();
+                        //out.flush();
+                        //out.writeUTF(forClientJSON);
+                        out.write(forClientByte);
                         break;
                     case "getTour":
                         System.out.println("CASE getTour");
@@ -363,8 +385,8 @@ class ThreadClient implements Runnable {
     
     void sentFile(ArrayList<TournamentTable> list) throws IOException{
         System.out.println("Добавляю потоки для файлов");                        
-        //String pathBig = "D:\\Pictures\\"; 
-        String pathBig = "/home/mark/Shares/Pictures/";
+        String pathBig = "D:\\Pictures\\"; 
+        //String pathBig = "/home/mark/Shares/Pictures/";
         int cnt_photo = 0; //кол-во существующих фоток
         for(int i = 0; i < list.size(); i++){                            
             File imageBig = new File(pathBig + list.get(i).getUrlImage());                            
@@ -375,20 +397,24 @@ class ThreadClient implements Runnable {
                 System.out.println("BIG Файл "+ list.get(i).getUrlImage() +" не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             }                            
         }
-        out.writeInt(cnt_photo); //кол-во файлов
+        //out.writeInt(cnt_photo); //кол-во файлов
         if(cnt_photo > 0){
+            System.out.println("Кол-во файлов " + list.size());
             for(int i = 0; i < list.size(); i++){                                
                 File imageBig = new File(pathBig + list.get(i).getUrlImage()); 
                 if(imageBig.exists()){
                     System.out.println("Файлы существует " + imageBig.getName());
-                    String nameImage = tournamentArray.get(i).getUrlImage().replace(".png",""); 
-                    out.writeUTF(nameImage);
+                    //String nameImage = tournamentArray.get(i).getUrlImage().replace(".png",""); 
+                    //out.writeUTF(nameImage);
                     byte[] byteArrayBig = new byte[(int)imageBig.length()];
                     BufferedInputStream streamBig = new BufferedInputStream(new FileInputStream(imageBig));
                     streamBig.read(byteArrayBig, 0, byteArrayBig.length);
                     streamBig.close();
-                    out.writeInt(byteArrayBig.length);
-                    out.write(byteArrayBig);
+                    //out.writeInt(byteArrayBig.length);
+                    String img =  Base64.getEncoder().encodeToString(byteArrayBig);
+                    list.get(i).setImageBase64(img);
+                    //System.out.println("Длина пакета = " + byteArrayBig.length);
+                    //out.write(byteArrayBig);
                     //out.flush();
                }else{
                     System.out.println("BIG Файл не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
