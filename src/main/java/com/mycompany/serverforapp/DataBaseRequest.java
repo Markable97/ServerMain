@@ -86,7 +86,9 @@ public class DataBaseRequest {
 "       team_guest, \n" +
 "       date_format(m_date,'%d-%m-%y %H:%i') as m_date, \n" +
 "       name_stadium, \n" +
-"       staff_name\n" +
+"       staff_name,\n" +
+"       logo_home,\n" +
+"       logo_guest\n" +
 "       FROM v_matches m\n" +
 "       where curdate() < m_date and id_division = ?"
             + " order by m_date;";
@@ -703,7 +705,7 @@ public class DataBaseRequest {
         }
     }
     
-    private  void getNextMatches(ResultSet result){
+    private  void getNextMatches(ResultSet result) throws IOException{
         String queryOutput = "";
         nextMatches.clear();
         try {
@@ -714,9 +716,15 @@ public class DataBaseRequest {
                 String t_guest = result.getString("team_guest");
                 String m_date = result.getString("m_date");
                 String stadium = result.getString("name_stadium");
+                String logoHome = result.getString("logo_home");
+                String logoGuest = result.getString("logo_guest");
+                String logoHomeBase64 = getBase64Image(logoHome);
+                String logoGuestBase64 = getBase64Image(logoGuest);
                 queryOutput += nameDivision + " " + tour + " " +t_home +  " " + t_guest + " " 
                             + m_date + " " + stadium + "\n";
-                nextMatches.add(new NextMatches(nameDivision, tour, t_home, t_guest, m_date, stadium));
+                NextMatches matches = new NextMatches(nameDivision, tour, t_home, t_guest, m_date, stadium);
+                matches.setImages(logoHomeBase64, logoGuestBase64);
+                nextMatches.add(matches);
             }
             System.out.println("DataBaseRequest getNextMatchrs():output query  from DB:" + queryOutput);
         } catch (SQLException ex) {

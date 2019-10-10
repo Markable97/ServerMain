@@ -20,6 +20,8 @@ public class NextMatches extends NextMatchesWithGoal{
     private String teamVisit;
     private String date;
     private String nameStadium;
+    String imageHome;
+    String imageGuest;
     
 
     public NextMatches(String nameDivision, int idTour, String teamHome, String teamVisit, String date, String nameStadium) {
@@ -80,6 +82,11 @@ public class NextMatches extends NextMatchesWithGoal{
 
     public String getNameStadium() {
         return nameStadium;
+    }
+
+    public void setImages(String imageHome, String imageGuest) {
+        this.imageHome = imageHome;
+        this.imageGuest = imageGuest;
     }
     
 }
