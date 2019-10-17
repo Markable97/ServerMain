@@ -249,7 +249,7 @@ public class DataBaseRequest {
     private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
-    public String updateResults(PrevMatches match, ArrayList<Player> players)throws SQLException {
+    synchronized public String updateResults(PrevMatches match, ArrayList<Player> players)throws SQLException {
         boolean f = false;
         try {
             connect.setAutoCommit(false);
@@ -305,7 +305,7 @@ public class DataBaseRequest {
         }
     }
     
-    public String setResults(PrevMatches match, ArrayList<Player> players){
+    synchronized public String setResults(PrevMatches match, ArrayList<Player> players){
         boolean f1, f2 = false;
         try {
             connect.setAutoCommit(false);
@@ -367,7 +367,7 @@ public class DataBaseRequest {
         }
     }
     
-    public void setSchedule(ArrayList<Schedule> schedule) throws SQLException{
+    synchronized public void setSchedule(ArrayList<Schedule> schedule) throws SQLException{
         int cnt = 0;
         connect.setAutoCommit(false);
         try {
@@ -399,7 +399,7 @@ public class DataBaseRequest {
         
     }
     
-    ArrayList<Schedule> getSchedule(String date) throws SQLException{
+    synchronized ArrayList<Schedule> getSchedule(String date) throws SQLException{
         ArrayList<Schedule> list = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlScheduleTime);
@@ -430,7 +430,7 @@ public class DataBaseRequest {
         return list;
     }
     
-    ArrayList<Stadiums> getNameStadium(String date) throws SQLException{
+    synchronized ArrayList<Stadiums> getNameStadium(String date) throws SQLException{
         ArrayList<Stadiums> stadiums = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlNameStadiums);
@@ -451,7 +451,7 @@ public class DataBaseRequest {
         return stadiums;
     }
     
-    int getCntStadium(String date) throws SQLException{
+    synchronized int getCntStadium(String date) throws SQLException{
         try {
             prCntStadiums = connect.prepareStatement(sqlCountStadiums);
             prCntStadiums.setString(1, date);
@@ -470,7 +470,7 @@ public class DataBaseRequest {
         return 0;
     }
     
-    void connection_login(String email, String passwordUser) throws SQLException{
+    synchronized void connection_login(String email, String passwordUser) throws SQLException{
         try {
             settingForApp = 0;
             prFindUsers = connect.prepareStatement(sqlFindUsers);
@@ -485,7 +485,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_register(UsersLogin user_info, String name, String email) throws SQLException{
+    synchronized void connection_register(UsersLogin user_info, String name, String email) throws SQLException{
         try {
             prInsertUsers = connect.prepareStatement(sqlInsertUsers);
             prInsertUsers.setString(1, user_info.getUniqId());
@@ -507,7 +507,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_main_activity(int id_div) throws SQLException, IOException{
+    synchronized void connection_main_activity(int id_div) throws SQLException, IOException{
         try {
             tournamentTable.clear();
             prevMatches.clear();
@@ -536,7 +536,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_squad_info(String name_team) throws SQLException{
+    synchronized void connection_squad_info(String name_team) throws SQLException{
         try {
             prSquadInfo = connect.prepareStatement(sqlSquadInfo);
             prSquadInfo.setString(1, name_team);
@@ -549,7 +549,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_allMatches(String name_team) throws SQLException{
+    synchronized void connection_allMatches(String name_team) throws SQLException{
         prevMatches.clear();
         try {
             prAllMatches = connect.prepareStatement(sqlAllMatches);
@@ -564,7 +564,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_playerInMatch(int id_match) throws SQLException{
+    synchronized void connection_playerInMatch(int id_match) throws SQLException{
         try {
             prPlayerInMatch = connect.prepareStatement(sqlPlayersInMatch);
             prPlayerInMatch.setInt(1,id_match);
@@ -577,7 +577,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connectiom_playersProtocol(String teamName, int idMatch){
+    synchronized void connectiom_playersProtocol(String teamName, int idMatch){
          String queryOutput = "";
         try {
             preparetStatement = connect.prepareStatement(sqlGetProtocolTeam);
@@ -610,7 +610,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_getTour(int id_division, int id_tour) throws SQLException{
+    synchronized void connection_getTour(int id_division, int id_tour) throws SQLException{
         try{
             prGetTour = connect.prepareStatement(sqlGetTour);
             prGetTour.setInt(1, id_tour);
@@ -626,7 +626,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_getTourAddResults(int id_division, String m_date) throws SQLException{
+    synchronized void connection_getTourAddResults(int id_division, String m_date) throws SQLException{
         String date1 = m_date + " 00:00";
         String date2 = m_date + " 23:59";
         try{
@@ -644,7 +644,7 @@ public class DataBaseRequest {
         }
     }
     
-    private  void getTournamentTable(ResultSet result) throws IOException{
+     private  void getTournamentTable(ResultSet result) throws IOException{
         tournamentTable.clear();
         String queryOutput = "";
         try {

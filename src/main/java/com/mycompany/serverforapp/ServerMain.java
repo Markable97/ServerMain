@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class ServerMain {
             while(!server.isClosed()){
                 System.out.println("Waiting for a response from the client");
                 Socket fromclient = server.accept();
-                executeIt.submit(new ThreadClient(fromclient, number, dbr));
+                executeIt.submit(new ThreadClient(fromclient, number/*, dbr*/));
                 number++; 
                 //executeIt.shutdown();
             }
@@ -95,10 +96,10 @@ class ThreadClient implements Runnable {
     //BufferedWriter output_log;
     Gson gson = new Gson();
     
-    public ThreadClient(Socket client, int numberUser, DataBaseRequest dbr) throws IOException{
+    public ThreadClient(Socket client, int numberUser/*, DataBaseRequest dbr*/) throws IOException{
         this.fromclient = client;
         this.fromclient.setSoTimeout(15000); //Держит соединение 30 секунд, затем бросает исключение
-        this.dbr = dbr;
+        this.dbr = DataBaseRequest.getInstance();
         //this.dbr.openConnection();
         ip = client.getInetAddress().toString();
         /*try
@@ -190,7 +191,7 @@ class ThreadClient implements Runnable {
                         System.out.println(nextMatchesArray.toString());
                         System.out.println("New branch");
                         forClientByte = (tournamentTableToJson+"?"+prevMatchesToJson+
-                                "?"+nextMatchesToJson).getBytes();
+                                "?"+nextMatchesToJson).getBytes(StandardCharsets.UTF_8);
                         System.out.println("Size first = " + forClientByte.length);
                         out.write(forClientByte);
                         out.flush();
@@ -223,7 +224,11 @@ class ThreadClient implements Runnable {
                         forClientJSON = gson.toJson(playersArray);
                         System.out.println("[6]Array of object from DB to JSON");
                         System.out.println(forClientJSON);
-                        out.writeUTF(forClientJSON);
+                        /*System.out.println("Count str = " + forClientJSON.length());
+                        out.writeUTF(forClientJSON);*/
+                        forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
+                        System.out.println("Size first = " + forClientByte.length);
+                        out.write(forClientByte);
                         break;
                     case "matches":
                         System.out.println("Case matches for team " + messageToJson.getTeam_name());
@@ -371,7 +376,7 @@ class ThreadClient implements Runnable {
             try {
                 //this.output_log.write("Disconnect client, close channels....");
                 //this.output_log.flush();
-                System.out.println("Disconnect client, close channels....");
+                System.out.println("Disconnect client, close channels...." + ip);
                 //output_log.close();
                 in.close();
                 out.close();
