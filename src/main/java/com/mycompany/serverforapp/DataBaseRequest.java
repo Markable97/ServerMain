@@ -549,7 +549,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_allMatches(String name_team) throws SQLException{
+    synchronized void connection_allMatches(String name_team) throws SQLException, IOException{
         prevMatches.clear();
         try {
             prAllMatches = connect.prepareStatement(sqlAllMatches);
@@ -759,7 +759,7 @@ public class DataBaseRequest {
         }
     }
     
-    private  void getAllMatches(ResultSet result){
+    private  void getAllMatches(ResultSet result) throws IOException{
         String queryOutput = "";
         prevMatches.clear();
         try {
@@ -773,9 +773,13 @@ public class DataBaseRequest {
                 String t_guest = result.getString("team_guest");
                 String l_home = result.getString("logo_home");
                 String l_guest = result.getString("logo_guest");
+                String logoHomeBase64 = getBase64Image(l_home);
+                String logoGuestBase64 = getBase64Image(l_guest);
                 queryOutput+=id_match + " " + division + " " + tour + " " + t_home + " " + g_home + " " + g_guest + " " +
                         t_guest + " " + l_home + " " + l_guest + "\n";
-                prevMatches.add(new PrevMatches(id_match, division, tour, t_home, g_home, g_guest, t_guest, l_home, l_guest));
+                PrevMatches match = new PrevMatches(id_match, division, tour, t_home, g_home, g_guest, t_guest, l_home, l_guest);
+                match.setImages(logoHomeBase64, logoGuestBase64);
+                prevMatches.add(match);
             }
             System.out.println("DataBaseRequest getAllMatches():output query  from DB: " + queryOutput);
         } catch (SQLException ex) {
