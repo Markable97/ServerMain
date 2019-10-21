@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import main.java.com.mycompany.serverforapp.DataBaseSetting;
 
 /**
  *
@@ -19,37 +20,17 @@ import java.util.logging.Logger;
  */
 public class DataBaseRequest {
     
-    String user = "root";
-    String password = "7913194";
-    //String password = "Dan-dg7913194";
-    String url = "jdbc:mysql://localhost:3306/football_main_work";
     
-    public static DataBaseRequest db;
     private int settingForApp;
     Connection connect;
-    private DataBaseRequest(){
-       
-        try {
-            this.connect = DriverManager.getConnection(url, user, password);
-        } catch (SQLException ex) {
-            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    } 
-     
-   public static synchronized DataBaseRequest getInstance(){
-       if (db == null){
-           db = new DataBaseRequest();
+    DataBaseRequest(DataBaseSetting setting){
+       try{
+           this.connect = setting.dataSource.getConnection();
+       }catch (SQLException ex) {
+            System.out.println("Database connection failure: " + ex.getMessage());
        }
-       return db;
-   }
+    } 
   
-   public void openConnection(){
-        try {
-            this.connect = DriverManager.getConnection(url, user, password);
-        } catch (SQLException ex) {
-            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-   }
     String message = "SUCCESS";
     //-------переменные для sql запросов---------
     private  String sqlTournamentTable = "SELECT name_division, \n" +
@@ -249,7 +230,7 @@ public class DataBaseRequest {
     private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
-    synchronized public String updateResults(PrevMatches match, ArrayList<Player> players)throws SQLException {
+    public String updateResults(PrevMatches match, ArrayList<Player> players)throws SQLException {
         boolean f = false;
         try {
             connect.setAutoCommit(false);
@@ -305,7 +286,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized public String setResults(PrevMatches match, ArrayList<Player> players){
+    public String setResults(PrevMatches match, ArrayList<Player> players){
         boolean f1, f2 = false;
         try {
             connect.setAutoCommit(false);
@@ -367,7 +348,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized public void setSchedule(ArrayList<Schedule> schedule) throws SQLException{
+    public void setSchedule(ArrayList<Schedule> schedule) throws SQLException{
         int cnt = 0;
         connect.setAutoCommit(false);
         try {
@@ -399,7 +380,7 @@ public class DataBaseRequest {
         
     }
     
-    synchronized ArrayList<Schedule> getSchedule(String date) throws SQLException{
+    ArrayList<Schedule> getSchedule(String date) throws SQLException{
         ArrayList<Schedule> list = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlScheduleTime);
@@ -430,7 +411,7 @@ public class DataBaseRequest {
         return list;
     }
     
-    synchronized ArrayList<Stadiums> getNameStadium(String date) throws SQLException{
+    ArrayList<Stadiums> getNameStadium(String date) throws SQLException{
         ArrayList<Stadiums> stadiums = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlNameStadiums);
@@ -451,7 +432,7 @@ public class DataBaseRequest {
         return stadiums;
     }
     
-    synchronized int getCntStadium(String date) throws SQLException{
+    int getCntStadium(String date) throws SQLException{
         try {
             prCntStadiums = connect.prepareStatement(sqlCountStadiums);
             prCntStadiums.setString(1, date);
@@ -470,7 +451,7 @@ public class DataBaseRequest {
         return 0;
     }
     
-    synchronized void connection_login(String email, String passwordUser) throws SQLException{
+    void connection_login(String email, String passwordUser) throws SQLException{
         try {
             settingForApp = 0;
             prFindUsers = connect.prepareStatement(sqlFindUsers);
@@ -485,7 +466,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_register(UsersLogin user_info, String name, String email) throws SQLException{
+    void connection_register(UsersLogin user_info, String name, String email) throws SQLException{
         try {
             prInsertUsers = connect.prepareStatement(sqlInsertUsers);
             prInsertUsers.setString(1, user_info.getUniqId());
@@ -507,7 +488,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_main_activity(int id_div) throws SQLException, IOException{
+    void connection_main_activity(int id_div) throws SQLException, IOException{
         try {
             tournamentTable.clear();
             prevMatches.clear();
@@ -536,7 +517,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_squad_info(String name_team) throws SQLException{
+    void connection_squad_info(String name_team) throws SQLException{
         try {
             prSquadInfo = connect.prepareStatement(sqlSquadInfo);
             prSquadInfo.setString(1, name_team);
@@ -549,7 +530,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_allMatches(String name_team) throws SQLException, IOException{
+    void connection_allMatches(String name_team) throws SQLException, IOException{
         prevMatches.clear();
         try {
             prAllMatches = connect.prepareStatement(sqlAllMatches);
@@ -564,7 +545,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_playerInMatch(int id_match) throws SQLException{
+    void connection_playerInMatch(int id_match) throws SQLException{
         try {
             prPlayerInMatch = connect.prepareStatement(sqlPlayersInMatch);
             prPlayerInMatch.setInt(1,id_match);
@@ -577,7 +558,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connectiom_playersProtocol(String teamName, int idMatch){
+    void connectiom_playersProtocol(String teamName, int idMatch){
          String queryOutput = "";
         try {
             preparetStatement = connect.prepareStatement(sqlGetProtocolTeam);
@@ -610,7 +591,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_getTour(int id_division, int id_tour) throws SQLException{
+    void connection_getTour(int id_division, int id_tour) throws SQLException{
         try{
             prGetTour = connect.prepareStatement(sqlGetTour);
             prGetTour.setInt(1, id_tour);
@@ -626,7 +607,7 @@ public class DataBaseRequest {
         }
     }
     
-    synchronized void connection_getTourAddResults(int id_division, String m_date) throws SQLException{
+    void connection_getTourAddResults(int id_division, String m_date) throws SQLException{
         String date1 = m_date + " 00:00";
         String date2 = m_date + " 23:59";
         try{
@@ -660,7 +641,7 @@ public class DataBaseRequest {
                 int sc_con = result.getInt("sc_con");
                 int points = result.getInt("points");
                 String logo = result.getString("logo");
-                String imageBase64 = getBase64Image(logo);
+                String imageBase64 = getBase64Image(logo, nameDivision);
                 queryOutput += nameDivision + " " + teamName + " " + games  + " " + wins + " "  + draws + " "
                         + losses + " " + goals_scored + " " + goals_conceded + " "
                         + sc_con + " " + points + " " + logo + "\n";
@@ -691,8 +672,8 @@ public class DataBaseRequest {
                 String stadium = result.getString("name_stadium");
                 String logoHome = result.getString("logo_home");
                 String logoGuest = result.getString("logo_guest");
-                String logoHomeBase64 = getBase64Image(logoHome);
-                String logoGuestBase64 = getBase64Image(logoGuest);
+                String logoHomeBase64 = getBase64Image(logoHome, nameDivision);
+                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision);
                 queryOutput +=id_match + " " + nameDivision + " " + tour + " " + teamHome + " " + goalHome + " " +
                         goalGuest + " " + teamGuest + " " + mDate + " " + stadium + " " + logoHome + " " + logoGuest + "\n";
                 PrevMatches matches = new PrevMatches(id_match, nameDivision, tour, teamHome, goalHome, goalGuest, teamGuest, logoHome, logoGuest);
@@ -718,8 +699,8 @@ public class DataBaseRequest {
                 String stadium = result.getString("name_stadium");
                 String logoHome = result.getString("logo_home");
                 String logoGuest = result.getString("logo_guest");
-                String logoHomeBase64 = getBase64Image(logoHome);
-                String logoGuestBase64 = getBase64Image(logoGuest);
+                String logoHomeBase64 = getBase64Image(logoHome, nameDivision);
+                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision);
                 queryOutput += nameDivision + " " + tour + " " +t_home +  " " + t_guest + " " 
                             + m_date + " " + stadium + "\n";
                 NextMatches matches = new NextMatches(nameDivision, tour, t_home, t_guest, m_date, stadium);
@@ -773,8 +754,8 @@ public class DataBaseRequest {
                 String t_guest = result.getString("team_guest");
                 String l_home = result.getString("logo_home");
                 String l_guest = result.getString("logo_guest");
-                String logoHomeBase64 = getBase64Image(l_home);
-                String logoGuestBase64 = getBase64Image(l_guest);
+                String logoHomeBase64 = getBase64Image(l_home, division);
+                String logoGuestBase64 = getBase64Image(l_guest, division);
                 queryOutput+=id_match + " " + division + " " + tour + " " + t_home + " " + g_home + " " + g_guest + " " +
                         t_guest + " " + l_home + " " + l_guest + "\n";
                 PrevMatches match = new PrevMatches(id_match, division, tour, t_home, g_home, g_guest, t_guest, l_home, l_guest);
@@ -872,6 +853,7 @@ public class DataBaseRequest {
     public void closeConnection(){
         try {
             connect.close();
+            System.out.println("Close connection DataBase");
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -901,9 +883,9 @@ public class DataBaseRequest {
         return settingForApp;
     }
 
-    String getBase64Image(String logo) throws FileNotFoundException, IOException{
-        String pathBig = "D:\\Pictures\\"; 
-        //String pathBig = "/home/mark/Shares/Pictures/";
+    String getBase64Image(String logo, String divivsion) throws FileNotFoundException, IOException{
+        String pathBig = "D:\\Pictures\\"+divivsion+"\\"; 
+        //String pathBig = "/home/mark/Shares/Pictures/+divivsion+/";
         File image = new File(pathBig + logo); 
         if(image.exists()){
             System.out.println("Файлы существует " + image.getName());
