@@ -3,7 +3,6 @@ package com.mycompany.serverforapp;
 
 import com.google.gson.Gson;
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -98,7 +97,7 @@ class ThreadClient implements Runnable {
     
     public ThreadClient(Socket client, int numberUser/*, DataBaseRequest dbr*/) throws IOException{
         this.fromclient = client;
-        this.fromclient.setSoTimeout(15000); //Держит соединение 30 секунд, затем бросает исключение
+        this.fromclient.setSoTimeout(5000); //Держит соединение 30 секунд, затем бросает исключение
         this.dbr = DataBaseRequest.getInstance();
         //this.dbr.openConnection();
         ip = client.getInetAddress().toString();
@@ -140,8 +139,8 @@ class ThreadClient implements Runnable {
                         break;
                     }
                 }   
-                 System.out.println(outputStream.toString());
-                 input = outputStream.toString();
+                 System.out.println(outputStream.toString(StandardCharsets.UTF_8));
+                 input = outputStream.toString(StandardCharsets.UTF_8);
                 //input = in.readUTF();
                 //System.out.println("new branch locig server");
                
@@ -213,8 +212,10 @@ class ThreadClient implements Runnable {
                         forClientJSON = gson.toJson(playersArray);
                         System.out.println("[4]Array of object from DB to JSON");
                         System.out.println(forClientJSON);
-                        out.writeUTF(forClientJSON);
-                        sentFilePlayer(playersArray);
+                        forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
+                        out.write(forClientByte);
+                        //out.writeUTF(forClientJSON);
+                        //sentFilePlayer(playersArray);
                         break;
                     case "player":
                         System.out.println("Case matches for player");
@@ -238,9 +239,11 @@ class ThreadClient implements Runnable {
                         forClientJSON = gson.toJson(prevMatchesArray);
                         System.out.println("[5]Array of object from DB to JSON");
                         System.out.println(forClientJSON);
-                        out.writeUTF(forClientJSON);
-                        System.out.println("Поток для фоток");
-                        sentFileAllMatches(prevMatchesArray, teamName);
+                        forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
+                        out.write(forClientByte);
+                        //out.writeUTF(forClientJSON);
+                        //System.out.println("Поток для фоток");
+                       // sentFileAllMatches(prevMatchesArray, teamName);
                         //out.write(listImage.size()); 
                         break;
                     case "register":
@@ -353,7 +356,6 @@ class ThreadClient implements Runnable {
                         break;
                 }//case 
             }//while 
-           
             //System.out.println("Disconnect client, close channels....");
             //System.out.println("waiting for a new client*********");
             //in.close();
@@ -371,7 +373,10 @@ class ThreadClient implements Runnable {
   
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+        }catch(Exception ex){
+                  System.out.println("Motherfucker swift library!!!!");
+                  }
+        finally{
             //dbr.closeConnection();
             try {
                 //this.output_log.write("Disconnect client, close channels....");
