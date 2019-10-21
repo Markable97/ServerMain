@@ -120,7 +120,7 @@ public class DataBaseRequest {
 "       logo_guest\n" +
 "       FROM v_matches m\n" +
 "       where team_home = ? or team_guest = ?\n" +
-"       order by id_tour desc;";
+"       order by id_tour asc;" ;
     private  String sqlPlayersInMatch = "select pm.id_player, pm.name,\n" +
 "	   pm.team_name,\n" +
 "	   pm.number,\n" +
