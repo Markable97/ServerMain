@@ -99,7 +99,7 @@ class ThreadClient implements Runnable {
     String ip;
     //BufferedWriter output_log;
     Gson gson = new Gson();
-    
+  
     public ThreadClient(Socket client, int numberUser/*, DataBaseRequest dbr*/) throws IOException{
         this.fromclient = client;
         this.fromclient.setSoTimeout(5000); //Держит соединение 30 секунд, затем бросает исключение
@@ -130,8 +130,21 @@ class ThreadClient implements Runnable {
             System.out.println("Сlient is connected");
             exit:
             while(fromclient.isConnected()){
-                System.out.println("Wait message..."); 
-                byte[] data = null;
+                System.out.println("Wait message...");
+                int read;
+                String str = "";
+                System.out.println("First" + in.available());
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                do{
+                    read = in.read();
+                    System.out.println(read);
+                    outputStream.write(read);
+                    str+=(char)read;
+                }while(in.available()> 0);
+                System.out.println(str);
+                System.out.println("\n"+outputStream.toString(StandardCharsets.UTF_8));
+                input = outputStream.toString(StandardCharsets.UTF_8);
+                /*byte[] data = null;
                 int length = -1;
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 //in = new DataInputStream(fromclient.getInputStream());
@@ -143,9 +156,9 @@ class ThreadClient implements Runnable {
                     }else{
                         break;
                     }
-                }   
-                 System.out.println(outputStream.toString(StandardCharsets.UTF_8));
-                 input = outputStream.toString(StandardCharsets.UTF_8);
+                } */  
+                 //System.out.println(outputStream.toString(StandardCharsets.UTF_8));
+                 //input = outputStream.toString(StandardCharsets.UTF_8);
                 //input = in.readUTF();
                 //System.out.println("new branch locig server");
                
