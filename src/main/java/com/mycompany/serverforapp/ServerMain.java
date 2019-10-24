@@ -137,11 +137,11 @@ class ThreadClient implements Runnable {
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 do{
                     read = in.read();
-                    System.out.println(read);
+                    //System.out.println(read);
                     outputStream.write(read);
                     str+=(char)read;
                 }while(in.available()> 0);
-                System.out.println(str);
+                //System.out.println(str);
                 System.out.println("\n"+outputStream.toString(StandardCharsets.UTF_8));
                 input = outputStream.toString(StandardCharsets.UTF_8);
                 /*byte[] data = null;
@@ -207,11 +207,13 @@ class ThreadClient implements Runnable {
                         System.out.println("[3]Array of object from DB to JSON");
                         System.out.println(nextMatchesArray.toString());
                         System.out.println("New branch");
+                        System.out.println(nextMatchesArray.get(0).imageGuest);
                         forClientByte = (tournamentTableToJson+"?"+prevMatchesToJson+
                                 "?"+nextMatchesToJson).getBytes(StandardCharsets.UTF_8);
                         System.out.println("Size first = " + forClientByte.length);
-                        out.write(forClientByte);
+                        out.write(forClientByte, 0, forClientByte.length);
                         out.flush();
+                        
                         //out.writeUTF(tournamentTableToJson);
                         //out.writeUTF(prevMatchesToJson);
                         //out.writeUTF(nextMatchesToJson);
@@ -284,10 +286,11 @@ class ThreadClient implements Runnable {
                         dbr.connection_login(user_info.email, user_info.password);
                         forClientJSON = gson.toJson(new MessageToJson(dbr.getMessage(),dbr.getSettingForApp()));
                         System.out.println("Message from db = " + dbr.getMessage());
-                        forClientByte = forClientJSON.getBytes();
+                        forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         //out.flush();
                         //out.writeUTF(forClientJSON);
                         out.write(forClientByte);
+                        fromclient.close();
                         break;
                     case "getTour":
                         System.out.println("CASE getTour");
