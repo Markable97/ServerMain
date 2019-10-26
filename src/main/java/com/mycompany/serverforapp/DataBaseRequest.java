@@ -1,11 +1,18 @@
 package com.mycompany.serverforapp;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import main.java.com.mycompany.serverforapp.DataBaseSetting;
 
 /**
  *
@@ -13,36 +20,17 @@ import java.util.logging.Logger;
  */
 public class DataBaseRequest {
     
-    String user = "root";
-    String password = "7913194";
-    String url = "jdbc:mysql://localhost:3306/football_main_work";
     
-    public static DataBaseRequest db;
     private int settingForApp;
     Connection connect;
-    private DataBaseRequest(){
-       
-        try {
-            this.connect = DriverManager.getConnection(url, user, password);
-        } catch (SQLException ex) {
-            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    } 
-     
-   public static synchronized DataBaseRequest getInstance(){
-       if (db == null){
-           db = new DataBaseRequest();
+    DataBaseRequest(DataBaseSetting setting){
+       try{
+           this.connect = setting.dataSource.getConnection();
+       }catch (SQLException ex) {
+            System.out.println("Database connection failure: " + ex.getMessage());
        }
-       return db;
-   }
+    } 
   
-   public void openConnection(){
-        try {
-            this.connect = DriverManager.getConnection(url, user, password);
-        } catch (SQLException ex) {
-            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-   }
     String message = "SUCCESS";
     //-------переменные для sql запросов---------
     private  String sqlTournamentTable = "SELECT name_division, \n" +
@@ -69,7 +57,8 @@ public class DataBaseRequest {
 "       name_stadium, \n" +
 "       staff_name,\n" +
 "       logo_home,\n" +
-"       logo_guest\n" +
+"       logo_guest,\n" +
+"       played \n" +
 "       FROM v_matches \n" +
 "       where (to_days(curdate()) - to_days(m_date) ) >= 0 and (to_days(curdate()) - to_days(m_date)) < 8\n" +
 "       and id_division = ? and goal_home is not null;";
@@ -79,7 +68,9 @@ public class DataBaseRequest {
 "       team_guest, \n" +
 "       date_format(m_date,'%d-%m-%y %H:%i') as m_date, \n" +
 "       name_stadium, \n" +
-"       staff_name\n" +
+"       staff_name,\n" +
+"       logo_home,\n" +
+"       logo_guest\n" +
 "       FROM v_matches m\n" +
 "       where curdate() < m_date and id_division = ?"
             + " order by m_date;";
@@ -108,10 +99,11 @@ public class DataBaseRequest {
 "       name_stadium, \n" +
 "       staff_name,\n" +
 "       logo_home,\n" +
-"       logo_guest\n" +
+"       logo_guest,\n" +
+"       played \n" +            
 "       FROM v_matches m\n" +
 "       where team_home = ? or team_guest = ?\n" +
-"       order by id_tour desc;";
+"       order by id_tour asc;" ;
     private  String sqlPlayersInMatch = "select pm.id_player, pm.name,\n" +
 "	   pm.team_name,\n" +
 "	   pm.number,\n" +
@@ -498,7 +490,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_main_activity(int id_div) throws SQLException{
+    void connection_main_activity(int id_div) throws SQLException, IOException{
         try {
             tournamentTable.clear();
             prevMatches.clear();
@@ -540,7 +532,7 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_allMatches(String name_team) throws SQLException{
+    void connection_allMatches(String name_team) throws SQLException, IOException{
         prevMatches.clear();
         try {
             prAllMatches = connect.prepareStatement(sqlAllMatches);
@@ -635,7 +627,7 @@ public class DataBaseRequest {
         }
     }
     
-    private  void getTournamentTable(ResultSet result){
+     private  void getTournamentTable(ResultSet result) throws IOException{
         tournamentTable.clear();
         String queryOutput = "";
         try {
@@ -651,11 +643,14 @@ public class DataBaseRequest {
                 int sc_con = result.getInt("sc_con");
                 int points = result.getInt("points");
                 String logo = result.getString("logo");
+                String imageBase64 = getBase64Image(logo, nameDivision);
                 queryOutput += nameDivision + " " + teamName + " " + games  + " " + wins + " "  + draws + " "
                         + losses + " " + goals_scored + " " + goals_conceded + " "
                         + sc_con + " " + points + " " + logo + "\n";
-                tournamentTable.add(new TournamentTable(nameDivision, teamName, games,  points, wins, draws, losses, 
-                        goals_scored, goals_conceded/*, sc_con*/,  logo));
+                TournamentTable table = new TournamentTable(nameDivision, teamName, games,  points, wins, draws, losses, 
+                        goals_scored, goals_conceded/*, sc_con*/,  logo);
+                table.setImageBase64(imageBase64);
+                tournamentTable.add(table);
             }
             System.out.println("DataBaseRequest getTournamentTable(): output query from DB: \n" + queryOutput);
         } catch (SQLException ex) {
@@ -663,7 +658,7 @@ public class DataBaseRequest {
         }
     }
 
-    private  void getPrevMatches(ResultSet result){
+    private  void getPrevMatches(ResultSet result) throws IOException{
         String queryOutput = "";
         prevMatches.clear();
         try {
@@ -679,9 +674,15 @@ public class DataBaseRequest {
                 String stadium = result.getString("name_stadium");
                 String logoHome = result.getString("logo_home");
                 String logoGuest = result.getString("logo_guest");
+                String logoHomeBase64 = getBase64Image(logoHome, nameDivision);
+                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision);
+                int played = result.getInt("played");
                 queryOutput +=id_match + " " + nameDivision + " " + tour + " " + teamHome + " " + goalHome + " " +
                         goalGuest + " " + teamGuest + " " + mDate + " " + stadium + " " + logoHome + " " + logoGuest + "\n";
-                prevMatches.add(new PrevMatches(id_match, nameDivision, tour, teamHome, goalHome, goalGuest, teamGuest, logoHome, logoGuest));
+                PrevMatches matches = new PrevMatches(id_match, nameDivision, tour, teamHome, goalHome, goalGuest, teamGuest, logoHome, logoGuest);
+                matches.setImages(logoHomeBase64, logoGuestBase64);
+                matches.played = played;
+                prevMatches.add(matches);
             }
             System.out.println("DataBaseRequest getPrevMatches(): output query  from DB:" + queryOutput);
         } catch (SQLException ex) {
@@ -689,7 +690,7 @@ public class DataBaseRequest {
         }
     }
     
-    private  void getNextMatches(ResultSet result){
+    private  void getNextMatches(ResultSet result) throws IOException{
         String queryOutput = "";
         nextMatches.clear();
         try {
@@ -700,9 +701,15 @@ public class DataBaseRequest {
                 String t_guest = result.getString("team_guest");
                 String m_date = result.getString("m_date");
                 String stadium = result.getString("name_stadium");
+                String logoHome = result.getString("logo_home");
+                String logoGuest = result.getString("logo_guest");
+                String logoHomeBase64 = getBase64Image(logoHome, nameDivision);
+                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision);
                 queryOutput += nameDivision + " " + tour + " " +t_home +  " " + t_guest + " " 
                             + m_date + " " + stadium + "\n";
-                nextMatches.add(new NextMatches(nameDivision, tour, t_home, t_guest, m_date, stadium));
+                NextMatches matches = new NextMatches(nameDivision, tour, t_home, t_guest, m_date, stadium);
+                matches.setImages(logoHomeBase64, logoGuestBase64);
+                nextMatches.add(matches);
             }
             System.out.println("DataBaseRequest getNextMatchrs():output query  from DB:" + queryOutput);
         } catch (SQLException ex) {
@@ -737,7 +744,7 @@ public class DataBaseRequest {
         }
     }
     
-    private  void getAllMatches(ResultSet result){
+    private  void getAllMatches(ResultSet result) throws IOException{
         String queryOutput = "";
         prevMatches.clear();
         try {
@@ -751,9 +758,15 @@ public class DataBaseRequest {
                 String t_guest = result.getString("team_guest");
                 String l_home = result.getString("logo_home");
                 String l_guest = result.getString("logo_guest");
+                String logoHomeBase64 = getBase64Image(l_home, division);
+                String logoGuestBase64 = getBase64Image(l_guest, division);
+                int played = result.getInt("played");
                 queryOutput+=id_match + " " + division + " " + tour + " " + t_home + " " + g_home + " " + g_guest + " " +
                         t_guest + " " + l_home + " " + l_guest + "\n";
-                prevMatches.add(new PrevMatches(id_match, division, tour, t_home, g_home, g_guest, t_guest, l_home, l_guest));
+                PrevMatches match = new PrevMatches(id_match, division, tour, t_home, g_home, g_guest, t_guest, l_home, l_guest);
+                match.setImages(logoHomeBase64, logoGuestBase64);
+                match.played = played;
+                prevMatches.add(match);
             }
             System.out.println("DataBaseRequest getAllMatches():output query  from DB: " + queryOutput);
         } catch (SQLException ex) {
@@ -846,6 +859,7 @@ public class DataBaseRequest {
     public void closeConnection(){
         try {
             connect.close();
+            System.out.println("Close connection DataBase");
         } catch (SQLException ex) {
             Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -875,5 +889,24 @@ public class DataBaseRequest {
         return settingForApp;
     }
 
-    
+    String getBase64Image(String logo, String divivsion) throws FileNotFoundException, IOException{
+        String pathBig = "D:\\Pictures\\"+divivsion+"\\"; 
+        //String pathBig = "/home/mark/Shares/Pictures/+divivsion+/";
+        File image = new File(pathBig + logo); 
+        if(image.exists()){
+            System.out.println("Файлы существует " + image.getName());
+                    //String nameImage = tournamentArray.get(i).getUrlImage().replace(".png",""); 
+                    //out.writeUTF(nameImage);
+                    byte[] byteArrayBig = new byte[(int)image.length()];
+                    BufferedInputStream streamBig = new BufferedInputStream(new FileInputStream(image));
+                    streamBig.read(byteArrayBig, 0, byteArrayBig.length);
+                    streamBig.close();
+                    //out.writeInt(byteArrayBig.length);
+                    return Base64.getEncoder().encodeToString(byteArrayBig);
+        }else{
+            System.out.println("Файл "+logo+" не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            return "";
+        }
+        
+    }
 }

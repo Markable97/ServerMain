@@ -25,6 +25,7 @@ public class TournamentTable implements Serializable {
     private int goalScored;
     private int goalConceded;
     private int sc_con;
+    private String imageBase64;
     private transient String urlImage;
    
     public TournamentTable(String division, String team, int games,int wins, int draws, int losses,
@@ -89,6 +90,10 @@ public class TournamentTable implements Serializable {
     
     private void setGoalConceded(int goalConceded) {
         this.goalConceded = goalConceded;
+    }
+
+    public void setImageBase64(String imageBase64) {
+        this.imageBase64 = imageBase64;
     }
     
     public String getDivisionName() {
