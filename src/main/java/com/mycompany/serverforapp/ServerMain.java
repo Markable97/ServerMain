@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import main.java.com.mycompany.serverforapp.DataBaseSetting;
 
 
 /*
@@ -48,7 +49,8 @@ public class ServerMain {
        System.out.println("Enabling the server");
        ServerSocket server = new ServerSocket(55555);
        int number = 0;
-       DataBaseRequest dbr = DataBaseRequest.getInstance();
+       //DataBaseSetting dbSetting = DataBaseSetting.getInstance();
+       //DataBaseRequest dbr = DataBaseRequest.getInstance();
         try {
             while(!server.isClosed()){
                 System.out.println("Waiting for a response from the client");
@@ -79,6 +81,8 @@ class ThreadClient implements Runnable {
     String id_team;
     String date;
     MessageRegister user_info;
+    Calendar dateNow = Calendar.getInstance();
+    SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     
     ArrayList<TournamentTable> tournamentArray;//турнирная таблица в виде массива
     ArrayList<PrevMatches> prevMatchesArray;//список прошедшего тура в виде массива
@@ -89,17 +93,18 @@ class ThreadClient implements Runnable {
     DataOutputStream out;
     //DataOutputStream outTournamentTable;
     DataBaseRequest dbr;
+    DataBaseSetting dbs;
     MessageToJson messageToJson;
     
     String ip;
     //BufferedWriter output_log;
     Gson gson = new Gson();
-    
+  
     public ThreadClient(Socket client, int numberUser/*, DataBaseRequest dbr*/) throws IOException{
         this.fromclient = client;
         this.fromclient.setSoTimeout(5000); //Держит соединение 30 секунд, затем бросает исключение
-        this.dbr = DataBaseRequest.getInstance();
-        //this.dbr.openConnection();
+        this.dbs = DataBaseSetting.getInstance();
+        this.dbr = new DataBaseRequest(dbs);        //this.dbr.openConnection();
         ip = client.getInetAddress().toString();
         /*try
         {
@@ -114,7 +119,7 @@ class ThreadClient implements Runnable {
         }catch(IOException e){
             System.out.println(e.getMessage());
         }*/
-        System.out.println(client.getInetAddress() + " connection number = " + numberUser);
+        System.out.println(client.getInetAddress() + " connection number = " + numberUser + "\n"+formatForDateNow.format(dateNow.getTime()));
         in = new DataInputStream(fromclient.getInputStream());
         out = new DataOutputStream(fromclient.getOutputStream());
     }
@@ -125,8 +130,21 @@ class ThreadClient implements Runnable {
             System.out.println("Сlient is connected");
             exit:
             while(fromclient.isConnected()){
-                System.out.println("Wait message..."); 
-                byte[] data = null;
+                System.out.println("Wait message...");
+                int read;
+                String str = "";
+                System.out.println("First" + in.available());
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                do{
+                    read = in.read();
+                    //System.out.println(read);
+                    outputStream.write(read);
+                    str+=(char)read;
+                }while(in.available()> 0);
+                //System.out.println(str);
+                System.out.println("\n"+outputStream.toString(StandardCharsets.UTF_8));
+                input = outputStream.toString(StandardCharsets.UTF_8);
+                /*byte[] data = null;
                 int length = -1;
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 //in = new DataInputStream(fromclient.getInputStream());
@@ -138,9 +156,9 @@ class ThreadClient implements Runnable {
                     }else{
                         break;
                     }
-                }   
-                 System.out.println(outputStream.toString(StandardCharsets.UTF_8));
-                 input = outputStream.toString(StandardCharsets.UTF_8);
+                } */  
+                 //System.out.println(outputStream.toString(StandardCharsets.UTF_8));
+                 //input = outputStream.toString(StandardCharsets.UTF_8);
                 //input = in.readUTF();
                 //System.out.println("new branch locig server");
                
@@ -189,16 +207,18 @@ class ThreadClient implements Runnable {
                         System.out.println("[3]Array of object from DB to JSON");
                         System.out.println(nextMatchesArray.toString());
                         System.out.println("New branch");
+                        System.out.println(nextMatchesArray.get(0).imageGuest);
                         forClientByte = (tournamentTableToJson+"?"+prevMatchesToJson+
                                 "?"+nextMatchesToJson).getBytes(StandardCharsets.UTF_8);
                         System.out.println("Size first = " + forClientByte.length);
-                        out.write(forClientByte);
+                        out.write(forClientByte, 0, forClientByte.length);
                         out.flush();
+                        
                         //out.writeUTF(tournamentTableToJson);
                         //out.writeUTF(prevMatchesToJson);
                         //out.writeUTF(nextMatchesToJson);
                         //отправка на клиент
-                        
+                        fromclient.close();
 
                         break;
 
@@ -214,6 +234,7 @@ class ThreadClient implements Runnable {
                         System.out.println(forClientJSON);
                         forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         out.write(forClientByte);
+                        fromclient.close();
                         //out.writeUTF(forClientJSON);
                         //sentFilePlayer(playersArray);
                         break;
@@ -230,6 +251,7 @@ class ThreadClient implements Runnable {
                         forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         System.out.println("Size first = " + forClientByte.length);
                         out.write(forClientByte);
+                        fromclient.close();
                         break;
                     case "matches":
                         System.out.println("Case matches for team " + messageToJson.getTeam_name());
@@ -241,6 +263,7 @@ class ThreadClient implements Runnable {
                         System.out.println(forClientJSON);
                         forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         out.write(forClientByte);
+                        fromclient.close();
                         //out.writeUTF(forClientJSON);
                         //System.out.println("Поток для фоток");
                        // sentFileAllMatches(prevMatchesArray, teamName);
@@ -266,10 +289,11 @@ class ThreadClient implements Runnable {
                         dbr.connection_login(user_info.email, user_info.password);
                         forClientJSON = gson.toJson(new MessageToJson(dbr.getMessage(),dbr.getSettingForApp()));
                         System.out.println("Message from db = " + dbr.getMessage());
-                        forClientByte = forClientJSON.getBytes();
+                        forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         //out.flush();
                         //out.writeUTF(forClientJSON);
                         out.write(forClientByte);
+                        fromclient.close();
                         break;
                     case "getTour":
                         System.out.println("CASE getTour");
@@ -377,7 +401,8 @@ class ThreadClient implements Runnable {
                   System.out.println("Motherfucker swift library!!!!");
                   }
         finally{
-            //dbr.closeConnection();
+            System.out.println(formatForDateNow.format(dateNow.getTime()));
+            dbr.closeConnection();
             try {
                 //this.output_log.write("Disconnect client, close channels....");
                 //this.output_log.flush();
@@ -385,7 +410,7 @@ class ThreadClient implements Runnable {
                 //output_log.close();
                 in.close();
                 out.close();
-                fromclient.close();
+                //fromclient.close();
                 System.out.println("waiting for a new client*********");
             } catch (IOException ex) {
                 Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
