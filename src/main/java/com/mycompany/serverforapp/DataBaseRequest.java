@@ -57,7 +57,8 @@ public class DataBaseRequest {
 "       name_stadium, \n" +
 "       staff_name,\n" +
 "       logo_home,\n" +
-"       logo_guest\n" +
+"       logo_guest,\n" +
+"       played \n" +
 "       FROM v_matches \n" +
 "       where (to_days(curdate()) - to_days(m_date) ) >= 0 and (to_days(curdate()) - to_days(m_date)) < 8\n" +
 "       and id_division = ? and goal_home is not null;";
@@ -98,7 +99,8 @@ public class DataBaseRequest {
 "       name_stadium, \n" +
 "       staff_name,\n" +
 "       logo_home,\n" +
-"       logo_guest\n" +
+"       logo_guest,\n" +
+"       played \n" +            
 "       FROM v_matches m\n" +
 "       where team_home = ? or team_guest = ?\n" +
 "       order by id_tour asc;" ;
@@ -674,10 +676,12 @@ public class DataBaseRequest {
                 String logoGuest = result.getString("logo_guest");
                 String logoHomeBase64 = getBase64Image(logoHome, nameDivision);
                 String logoGuestBase64 = getBase64Image(logoGuest, nameDivision);
+                int played = result.getInt("played");
                 queryOutput +=id_match + " " + nameDivision + " " + tour + " " + teamHome + " " + goalHome + " " +
                         goalGuest + " " + teamGuest + " " + mDate + " " + stadium + " " + logoHome + " " + logoGuest + "\n";
                 PrevMatches matches = new PrevMatches(id_match, nameDivision, tour, teamHome, goalHome, goalGuest, teamGuest, logoHome, logoGuest);
                 matches.setImages(logoHomeBase64, logoGuestBase64);
+                matches.played = played;
                 prevMatches.add(matches);
             }
             System.out.println("DataBaseRequest getPrevMatches(): output query  from DB:" + queryOutput);
@@ -756,10 +760,12 @@ public class DataBaseRequest {
                 String l_guest = result.getString("logo_guest");
                 String logoHomeBase64 = getBase64Image(l_home, division);
                 String logoGuestBase64 = getBase64Image(l_guest, division);
+                int played = result.getInt("played");
                 queryOutput+=id_match + " " + division + " " + tour + " " + t_home + " " + g_home + " " + g_guest + " " +
                         t_guest + " " + l_home + " " + l_guest + "\n";
                 PrevMatches match = new PrevMatches(id_match, division, tour, t_home, g_home, g_guest, t_guest, l_home, l_guest);
                 match.setImages(logoHomeBase64, logoGuestBase64);
+                match.played = played;
                 prevMatches.add(match);
             }
             System.out.println("DataBaseRequest getAllMatches():output query  from DB: " + queryOutput);

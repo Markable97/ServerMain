@@ -21,6 +21,7 @@ public class PrevMatches {
      String teamVisit;
      String imageHome;
      String imageGuest;
+     int played;
      transient String urlImageHome;
      transient String urlImageGuest;
 

@@ -234,6 +234,7 @@ class ThreadClient implements Runnable {
                         System.out.println(forClientJSON);
                         forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         out.write(forClientByte);
+                        fromclient.close();
                         //out.writeUTF(forClientJSON);
                         //sentFilePlayer(playersArray);
                         break;
@@ -250,6 +251,7 @@ class ThreadClient implements Runnable {
                         forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         System.out.println("Size first = " + forClientByte.length);
                         out.write(forClientByte);
+                        fromclient.close();
                         break;
                     case "matches":
                         System.out.println("Case matches for team " + messageToJson.getTeam_name());
@@ -261,6 +263,7 @@ class ThreadClient implements Runnable {
                         System.out.println(forClientJSON);
                         forClientByte = forClientJSON.getBytes(StandardCharsets.UTF_8);
                         out.write(forClientByte);
+                        fromclient.close();
                         //out.writeUTF(forClientJSON);
                         //System.out.println("Поток для фоток");
                        // sentFileAllMatches(prevMatchesArray, teamName);
