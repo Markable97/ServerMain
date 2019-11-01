@@ -87,7 +87,7 @@ public class DataBaseRequest {
 "       red_card,\n" +
 "       photo\n" +
 "       from v_squad\n" +
-"       where team_name = ?;";
+"       where team_name = ? and games > 0;";
     private  String sqlAllMatches = "SELECT id_match, name_division, \n" +
 "	id_division, \n" +
 "       id_tour, \n" +
