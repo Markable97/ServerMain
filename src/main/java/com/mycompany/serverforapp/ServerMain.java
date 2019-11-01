@@ -207,7 +207,7 @@ class ThreadClient implements Runnable {
                         System.out.println("[3]Array of object from DB to JSON");
                         System.out.println(nextMatchesArray.toString());
                         System.out.println("New branch");
-                        System.out.println(nextMatchesArray.get(0).imageGuest);
+                        //System.out.println(nextMatchesArray.get(0).imageGuest);
                         forClientByte = (tournamentTableToJson+"?"+prevMatchesToJson+
                                 "?"+nextMatchesToJson).getBytes(StandardCharsets.UTF_8);
                         System.out.println("Size first = " + forClientByte.length);

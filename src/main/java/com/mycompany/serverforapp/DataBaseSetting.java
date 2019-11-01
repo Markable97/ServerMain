@@ -15,7 +15,7 @@ public class DataBaseSetting {
     
     public static DataBaseSetting ds;
     
-    private final String url = "jdbc:mysql://localhost:3306/football_main_work"
+    private final String url = "jdbc:mysql://localhost:3306/football_main_realese"
             + "?useSSL=false"
             + "&dataSource.cachePrepStmts=true" +
               "&dataSource.prepStmtCacheSize=250" +
