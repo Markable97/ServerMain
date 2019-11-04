@@ -3,6 +3,7 @@ package com.mycompany.serverforapp;
 
 import com.google.gson.Gson;
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -97,7 +98,7 @@ class ThreadClient implements Runnable {
     MessageToJson messageToJson;
     
     String ip;
-    //BufferedWriter output_log;
+    BufferedWriter output_log;
     Gson gson = new Gson();
   
     public ThreadClient(Socket client, int numberUser/*, DataBaseRequest dbr*/) throws IOException{
@@ -106,19 +107,16 @@ class ThreadClient implements Runnable {
         this.dbs = DataBaseSetting.getInstance();
         this.dbr = new DataBaseRequest(dbs);        //this.dbr.openConnection();
         ip = client.getInetAddress().toString();
-        /*try
+        try
         {
-           //String path = "C:\\Users\\march\\Desktop\\"; //WIndows
-           String path = "/home/mark/Shares/Log";
-           Calendar dateNow = Calendar.getInstance();
-           SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+           String path = "C:\\Users\\march\\Desktop\\"; //WIndows
+           //String path = "/home/mark/Shares/Log";
            this.output_log = new BufferedWriter( new FileWriter(path+ip+".txt", true)); 
-           this.output_log.newLine();
-           this.output_log.write("\n" + ip + " : connect in " + formatForDateNow.format(dateNow.getTime()) );
+           this.output_log.write(ip + " : connect in " + formatForDateNow.format(dateNow.getTime()) );
            this.output_log.newLine();
         }catch(IOException e){
             System.out.println(e.getMessage());
-        }*/
+        }
         System.out.println(client.getInetAddress() + " connection number = " + numberUser + "\n"+formatForDateNow.format(dateNow.getTime()));
         in = new DataInputStream(fromclient.getInputStream());
         out = new DataOutputStream(fromclient.getOutputStream());
@@ -144,27 +142,8 @@ class ThreadClient implements Runnable {
                 //System.out.println(str);
                 System.out.println("\n"+outputStream.toString(StandardCharsets.UTF_8));
                 input = outputStream.toString(StandardCharsets.UTF_8);
-                /*byte[] data = null;
-                int length = -1;
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                //in = new DataInputStream(fromclient.getInputStream());
-                while (true) {
-                    if ((length = in.available()) > 0) {
-                        data = new byte[length];
-                        in.readFully(data, 0, length);
-                        outputStream.write(data, 0, length);
-                    }else{
-                        break;
-                    }
-                } */  
-                 //System.out.println(outputStream.toString(StandardCharsets.UTF_8));
-                 //input = outputStream.toString(StandardCharsets.UTF_8);
-                //input = in.readUTF();
-                //System.out.println("new branch locig server");
-               
-                //System.out.println("String received from the client = \n" + input);
                 messageToJson = gson.fromJson(input, MessageToJson.class);
-                //this.output_log.write(messageToJson.toString());
+                this.output_log.write(messageToJson.toString());
                 System.out.println(messageToJson.toString());
                 
                 messageLogic = messageToJson.getMessageLogic();
@@ -388,26 +367,31 @@ class ThreadClient implements Runnable {
             //fromclient.close();
         } catch (IOException ex) {
             System.out.println("User turn off: " + ex.getLocalizedMessage());
-            /*try {
+            try {
                 this.output_log.write("User turn off: " + ex.getLocalizedMessage());
                 this.output_log.newLine();
             } catch (IOException ex1) {
                 Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex1);
-            }*/
+            }
   
         } catch (SQLException ex) {
             Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
         }catch(Exception ex){
-                  System.out.println("Motherfucker swift library!!!!");
-                  }
+            System.out.println("Motherfucker swift library!!!!");
+            try {
+                this.output_log.write("Motherfucker swift library!!!! \n" + ex.getMessage());
+            } catch (IOException ex1) {
+                Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex1);
+            }    
+         }
         finally{
             System.out.println(formatForDateNow.format(dateNow.getTime()));
             dbr.closeConnection();
             try {
-                //this.output_log.write("Disconnect client, close channels....");
-                //this.output_log.flush();
+                this.output_log.write("Disconnect client, close channels....\n");
+                this.output_log.flush();
                 System.out.println("Disconnect client, close channels...." + ip);
-                //output_log.close();
+                output_log.close();
                 in.close();
                 out.close();
                 //fromclient.close();
