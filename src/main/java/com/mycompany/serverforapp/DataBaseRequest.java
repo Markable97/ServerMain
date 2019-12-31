@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.java.com.mycompany.serverforapp.DataBaseSetting;
+import main.java.com.mycompany.serverforapp.Division;
 
 /**
  *
@@ -201,6 +202,9 @@ public class DataBaseRequest {
             + " set goal_home = ?, "
             + " goal_guest = ? "
             + " where id_match = ?;";
+    private String sqlListDivision = ""
+            + " select id_division, name_division "
+            + " from divisions;";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -232,6 +236,27 @@ public class DataBaseRequest {
     private  ArrayList<NextMatches> nextMatches = new ArrayList<>();
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
+    
+    public ArrayList<Division> getListdivision() throws SQLException{
+        ArrayList<Division> divisions = new ArrayList<>();
+        try {
+            preparetStatement = connect.prepareStatement(sqlListDivision);
+            resultSet = preparetStatement.executeQuery();
+            while(resultSet.next()){
+                int idDivision = resultSet.getInt(1);
+                String nameDivision = resultSet.getString(2);
+                divisions.add(new Division(idDivision, nameDivision));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DataBaseRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            resultSet.close();
+            preparetStatement.close();
+        }
+        System.out.println("List division:\n" + divisions.toString());
+        return divisions;
+    }
+    
     public String updateResults(PrevMatches match, ArrayList<Player> players)throws SQLException {
         boolean f = false;
         try {
@@ -890,8 +915,8 @@ public class DataBaseRequest {
     }
 
     String getBase64Image(String logo, String divivsion) throws FileNotFoundException, IOException{
-        String pathBig = "D:\\Pictures\\"+divivsion+"\\"; 
-        //String pathBig = "/home/mark/Shares/Pictures/+divivsion+/";
+        String pathBig = "D:\\Pictures\\UCL\\"+divivsion.charAt(10)+"\\"; 
+        //String pathBig = "D:\\Pictures\\"+divivsion+"\\"; 
         File image = new File(pathBig + logo); 
         if(image.exists()){
             System.out.println("Файлы существует " + image.getName());

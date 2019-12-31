@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.java.com.mycompany.serverforapp.DataBaseSetting;
+import main.java.com.mycompany.serverforapp.Division;
 
 
 /*
@@ -154,6 +155,14 @@ class ThreadClient implements Runnable {
                         System.out.println("Client closes the connection");
                         fromclient.close();
                         break exit;
+                    case "listDivision":
+                        ArrayList<Division> divisions = dbr.getListdivision();
+                        String divisionsToJSON = gson.toJson(divisions);
+                        forClientByte = divisionsToJSON.getBytes(StandardCharsets.UTF_8);
+                        System.out.println("Divisions to JSON: \n" + divisionsToJSON);
+                        out.write(forClientByte, 0, forClientByte.length);
+                        fromclient.close();
+                        break;
                     case "division":
                         id = messageToJson.getId();
                         dbr.connection_main_activity(id);

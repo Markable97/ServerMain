@@ -12,4 +12,5 @@ com\mycompany\serverforapp\MessageRegister.class
 com\mycompany\serverforapp\MessageToJson.class
 com\mycompany\serverforapp\Player.class
 com\mycompany\serverforapp\UsersLogin.class
+main\java\com\mycompany\serverforapp\Division.class
 com\mycompany\serverforapp\DataBaseRequest.class
