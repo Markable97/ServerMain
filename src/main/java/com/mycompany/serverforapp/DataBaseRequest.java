@@ -34,7 +34,7 @@ public class DataBaseRequest {
   
     String message = "SUCCESS";
     //-------переменные для sql запросов---------
-    private  String sqlTournamentTable = "SELECT name_division, \n" +
+    private  String sqlTournamentTable = "SELECT name_league, name_division, id_team, \n" +
 "	team_name, \n" +
 "       games, \n" +
 "       wins,\n" +
@@ -47,7 +47,7 @@ public class DataBaseRequest {
 "       logo \n" +
 "       FROM v_tournament_table\n" +
 "       where id_division = ?;";
-    private  String sqlPrevMatches = "SELECT id_match, name_division, \n" +
+    private  String sqlPrevMatches = "SELECT id_match, name_league, name_division, \n" +
 "	id_division, \n" +
 "       id_tour, \n" +
 "       team_home, \n" +
@@ -63,7 +63,7 @@ public class DataBaseRequest {
 "       FROM v_matches \n" +
 "       where (to_days(curdate()) - to_days(m_date) ) >= 0 and (to_days(curdate()) - to_days(m_date)) < 8\n" +
 "       and id_division = ? and goal_home is not null;";
-    private String sqlNextMatches = "SELECT name_division, \n" +
+    private String sqlNextMatches = "SELECT name_division, name_league, \n" +
 "       id_tour, \n" +
 "       team_home, \n" +
 "       team_guest, \n" +
@@ -88,7 +88,7 @@ public class DataBaseRequest {
 "       red_card,\n" +
 "       photo\n" +
 "       from v_squad\n" +
-"       where team_name = ? and games > 0;";
+"       where id_team = ? and games > 0;";
     private  String sqlAllMatches = "SELECT id_match, name_division, \n" +
 "	id_division, \n" +
 "       id_tour, \n" +
@@ -101,9 +101,11 @@ public class DataBaseRequest {
 "       staff_name,\n" +
 "       logo_home,\n" +
 "       logo_guest,\n" +
-"       played \n" +            
+"       played, \n"+ 
+"       name_league,"+ 
+"       id_league" +            
 "       FROM v_matches m\n" +
-"       where team_home = ? or team_guest = ?\n" +
+"       where team_home_id = ? or team_guest_id = ?\n" +
 "       order by id_tour asc;" ;
     private  String sqlPlayersInMatch = "select pm.id_player, pm.name,\n" +
 "	   pm.team_name,\n" +
@@ -544,10 +546,10 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_squad_info(String name_team) throws SQLException{
+    void connection_squad_info(int id_team) throws SQLException{
         try {
             prSquadInfo = connect.prepareStatement(sqlSquadInfo);
-            prSquadInfo.setString(1, name_team);
+            prSquadInfo.setInt(1, id_team);
             rsSquadInfo = prSquadInfo.executeQuery();
             getSquadInfo(rsSquadInfo);
         } catch (SQLException ex) {
@@ -557,12 +559,12 @@ public class DataBaseRequest {
         }
     }
     
-    void connection_allMatches(String name_team) throws SQLException, IOException{
+    void connection_allMatches(int id_team) throws SQLException, IOException{
         prevMatches.clear();
         try {
             prAllMatches = connect.prepareStatement(sqlAllMatches);
-            prAllMatches.setString(1, name_team);
-            prAllMatches.setString(2, name_team);
+            prAllMatches.setInt(1, id_team);
+            prAllMatches.setInt(2, id_team);
             rsAllMatches = prAllMatches.executeQuery();
             getAllMatches(rsAllMatches);
         } catch (SQLException ex) {
@@ -657,7 +659,9 @@ public class DataBaseRequest {
         String queryOutput = "";
         try {
             while(result.next()){
+                String nameLeague = result.getString("name_league");
                 String nameDivision = result.getString("name_division");
+                int idTeam = result.getInt("id_team");
                 String teamName = result.getString("team_name");
                 int games = result.getInt("games");
                 int wins = result.getInt("wins");
@@ -668,13 +672,15 @@ public class DataBaseRequest {
                 int sc_con = result.getInt("sc_con");
                 int points = result.getInt("points");
                 String logo = result.getString("logo");
-                String imageBase64 = getBase64Image(logo, nameDivision);
-                queryOutput += nameDivision + " " + teamName + " " + games  + " " + wins + " "  + draws + " "
+                String imageBase64 = getBase64Image(logo, nameDivision, nameLeague);
+                queryOutput +=nameLeague+" "+nameDivision + " " + idTeam + " " + teamName + " " + games  + " " + wins + " "  + draws + " "
                         + losses + " " + goals_scored + " " + goals_conceded + " "
                         + sc_con + " " + points + " " + logo + "\n";
                 TournamentTable table = new TournamentTable(nameDivision, teamName, games,  points, wins, draws, losses, 
                         goals_scored, goals_conceded/*, sc_con*/,  logo);
                 table.setImageBase64(imageBase64);
+                table.nameLeague = nameLeague;
+                table.idTeam = idTeam;
                 tournamentTable.add(table);
             }
             System.out.println("DataBaseRequest getTournamentTable(): output query from DB: \n" + queryOutput);
@@ -689,6 +695,7 @@ public class DataBaseRequest {
         try {
             while(result.next()){
                 int id_match = result.getInt("id_match");
+                String nameLeague = result.getString("name_league");
                 String nameDivision = result.getString("name_division");
                 int tour = result.getInt("id_tour");
                 String teamHome = result.getString("team_home");
@@ -699,14 +706,15 @@ public class DataBaseRequest {
                 String stadium = result.getString("name_stadium");
                 String logoHome = result.getString("logo_home");
                 String logoGuest = result.getString("logo_guest");
-                String logoHomeBase64 = getBase64Image(logoHome, nameDivision);
-                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision);
+                String logoHomeBase64 = getBase64Image(logoHome, nameDivision, nameLeague);
+                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision, nameLeague);
                 int played = result.getInt("played");
-                queryOutput +=id_match + " " + nameDivision + " " + tour + " " + teamHome + " " + goalHome + " " +
+                queryOutput +=id_match + " " + nameLeague + " " + nameDivision + " " + tour + " " + teamHome + " " + goalHome + " " +
                         goalGuest + " " + teamGuest + " " + mDate + " " + stadium + " " + logoHome + " " + logoGuest + "\n";
                 PrevMatches matches = new PrevMatches(id_match, nameDivision, tour, teamHome, goalHome, goalGuest, teamGuest, logoHome, logoGuest);
                 matches.setImages(logoHomeBase64, logoGuestBase64);
                 matches.played = played;
+                matches.nameLeague = nameLeague;
                 prevMatches.add(matches);
             }
             System.out.println("DataBaseRequest getPrevMatches(): output query  from DB:" + queryOutput);
@@ -721,6 +729,7 @@ public class DataBaseRequest {
         try {
             while(result.next()){
                 String nameDivision = result.getString("name_division");
+                String nameLeague = result.getString("name_league");
                 int tour = result.getInt("id_tour");
                 String t_home = result.getString("team_home");
                 String t_guest = result.getString("team_guest");
@@ -728,12 +737,13 @@ public class DataBaseRequest {
                 String stadium = result.getString("name_stadium");
                 String logoHome = result.getString("logo_home");
                 String logoGuest = result.getString("logo_guest");
-                String logoHomeBase64 = getBase64Image(logoHome, nameDivision);
-                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision);
-                queryOutput += nameDivision + " " + tour + " " +t_home +  " " + t_guest + " " 
+                String logoHomeBase64 = getBase64Image(logoHome, nameDivision, nameLeague);
+                String logoGuestBase64 = getBase64Image(logoGuest, nameDivision, nameLeague);
+                queryOutput +=nameLeague + " " + nameDivision + " " + tour + " " +t_home +  " " + t_guest + " " 
                             + m_date + " " + stadium + "\n";
                 NextMatches matches = new NextMatches(nameDivision, tour, t_home, t_guest, m_date, stadium);
                 matches.setImages(logoHomeBase64, logoGuestBase64);
+                matches.nameLeague = nameLeague;
                 nextMatches.add(matches);
             }
             System.out.println("DataBaseRequest getNextMatchrs():output query  from DB:" + queryOutput);
@@ -783,14 +793,16 @@ public class DataBaseRequest {
                 String t_guest = result.getString("team_guest");
                 String l_home = result.getString("logo_home");
                 String l_guest = result.getString("logo_guest");
-                String logoHomeBase64 = getBase64Image(l_home, division);
-                String logoGuestBase64 = getBase64Image(l_guest, division);
+                String league = result.getString("name_league");
+                String logoHomeBase64 = getBase64Image(l_home, division, league);
+                String logoGuestBase64 = getBase64Image(l_guest, division, league);
                 int played = result.getInt("played");
-                queryOutput+=id_match + " " + division + " " + tour + " " + t_home + " " + g_home + " " + g_guest + " " +
+                queryOutput+=id_match + " " + league + " " + division + " " + tour + " " + t_home + " " + g_home + " " + g_guest + " " +
                         t_guest + " " + l_home + " " + l_guest + "\n";
                 PrevMatches match = new PrevMatches(id_match, division, tour, t_home, g_home, g_guest, t_guest, l_home, l_guest);
                 match.setImages(logoHomeBase64, logoGuestBase64);
                 match.played = played;
+                match.nameLeague = league;
                 prevMatches.add(match);
             }
             System.out.println("DataBaseRequest getAllMatches():output query  from DB: " + queryOutput);
@@ -914,9 +926,9 @@ public class DataBaseRequest {
         return settingForApp;
     }
 
-    String getBase64Image(String logo, String divivsion) throws FileNotFoundException, IOException{
-        String pathBig = "D:\\Pictures\\UCL\\"+divivsion.charAt(10)+"\\"; 
-        //String pathBig = "D:\\Pictures\\"+divivsion+"\\"; 
+    String getBase64Image(String logo, String divivsion, String league) throws FileNotFoundException, IOException{
+        //String pathBig = "D:\\Pictures\\UCL\\"+divivsion.charAt(10)+"\\"; 
+        String pathBig = "D:\\Pictures\\ЛФЛ\\"+league+"\\"+divivsion+"\\"; 
         File image = new File(pathBig + logo); 
         if(image.exists()){
             System.out.println("Файлы существует " + image.getName());
@@ -929,7 +941,7 @@ public class DataBaseRequest {
                     //out.writeInt(byteArrayBig.length);
                     return Base64.getEncoder().encodeToString(byteArrayBig);
         }else{
-            System.out.println("Файл "+logo+" не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("Файл "+pathBig + logo+" не сущуствует!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             return "";
         }
         

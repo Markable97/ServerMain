@@ -15,7 +15,9 @@ import java.io.Serializable;
  */
 public class TournamentTable implements Serializable {
 
+    String nameLeague;
     private String divisionName;
+    int idTeam;
     private String teamName;
     private int games;
     private int points;

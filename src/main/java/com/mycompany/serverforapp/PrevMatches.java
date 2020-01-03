@@ -14,6 +14,7 @@ public class PrevMatches {
     
      int id_match;
      String nameDivision;
+     String nameLeague;
      int idTour;
      String teamHome;
      int goalHome;
@@ -52,7 +53,7 @@ public class PrevMatches {
 
     @Override
     public String toString() {
-        return "PrevMatches{" + "id_match=" + id_match + ", nameDivision=" + nameDivision + ", idTour=" + idTour + ", teamHome=" + teamHome + ", goalHome=" + goalHome
+        return "PrevMatches{" + "id_match=" + id_match + ", nameLeague=" + nameLeague + ", nameDivision=" + nameDivision + ", idTour=" + idTour + ", teamHome=" + teamHome + ", goalHome=" + goalHome
                 + ", goalVisit=" + goalVisit + ", teamVisit=" + teamVisit + '}'/*+"\n"+imageHome+"\n"*/;
     }
 

@@ -13,6 +13,7 @@ package com.mycompany.serverforapp;
 public class NextMatches extends NextMatchesWithGoal{
     
     private String nameDivision;
+    String nameLeague;
     private int idMatch;
     private int idDivision;
     private int idTour;
