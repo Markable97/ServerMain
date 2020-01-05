@@ -17,6 +17,7 @@ public class MessageToJson {
     private int id;
     int tour;
     String date;
+    String name_league;
     private String team_name;
     private MessageRegister user_info;
     String responseFromServer;

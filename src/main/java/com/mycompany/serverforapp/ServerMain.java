@@ -156,7 +156,7 @@ class ThreadClient implements Runnable {
                         fromclient.close();
                         break exit;
                     case "listDivision":
-                        ArrayList<Division> divisions = dbr.getListdivision();
+                        ArrayList<Division> divisions = dbr.getListdivision(messageToJson.name_league);
                         String divisionsToJSON = gson.toJson(divisions);
                         forClientByte = divisionsToJSON.getBytes(StandardCharsets.UTF_8);
                         System.out.println("Divisions to JSON: \n" + divisionsToJSON);

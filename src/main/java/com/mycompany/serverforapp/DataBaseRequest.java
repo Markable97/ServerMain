@@ -206,7 +206,8 @@ public class DataBaseRequest {
             + " where id_match = ?;";
     private String sqlListDivision = ""
             + " select id_division, name_division "
-            + " from divisions;";
+            + " from divisions"
+            + " where id_league = (select id_league from leagues where name_league = ?);";
     //------Для подготовки запросов-------------
     private  PreparedStatement preparetStatement;
     private  PreparedStatement prTournamentTable;
@@ -239,10 +240,11 @@ public class DataBaseRequest {
     private  ArrayList<Player> squadInfo = new ArrayList<>();
     //------------------------------------------
     
-    public ArrayList<Division> getListdivision() throws SQLException{
+    public ArrayList<Division> getListdivision(String nameLeague) throws SQLException{
         ArrayList<Division> divisions = new ArrayList<>();
         try {
             preparetStatement = connect.prepareStatement(sqlListDivision);
+            preparetStatement.setString(1, nameLeague);
             resultSet = preparetStatement.executeQuery();
             while(resultSet.next()){
                 int idDivision = resultSet.getInt(1);
